@@ -1,0 +1,41 @@
+{% extends "base.html" %}
+
+{% block title %}Home{% endblock title %}
+
+{% block content %}
+
+{% if banner %}
+<img src="{{banner.url}}" alt="Store Banner">
+{% endif %}
+
+<h4 class='home_categories_header'>Categories</h4>
+
+<div class='home_latest_categories'>
+    {% for category in categories %}
+    <a href="{% url 'category_detail' category.id %}">{{category.name}}</a>
+    {% endfor %}
+    <a href="{% url 'category_list' %}" class='home_view_all_categories_button'>View More</a>
+</div>
+
+<div class='home_latest_products'>
+
+    {% for product in products %}
+    <a href="{% url 'product_detail' product.id %}">
+        <div class='home_product_card'>
+            <img src="{{product.thumbnail.url}}" alt="{{product.name}}" class='home_product_card_image'>
+            <p class='home_product_card_name'>
+                {{product.name}}
+            </p>
+            <p class='product_card_category'>
+                {{product.category.name}}
+            </p>
+            <p class='product_card_price'>
+                {{product.price}}
+            </p>
+        </div>
+    </a>
+    {% endfor %}
+    <a href="{% url 'product_list' %}" class='home_view_all_products_button'>View All</a>
+</div>
+
+{% endblock content %}

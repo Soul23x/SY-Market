@@ -1,0 +1,11 @@
+{% extends "base-dashboard.html" %}
+
+{% block title %}Employee Add{% endblock title %}
+
+{% block content %}
+<form method='post' class='employee_add_form'>
+    {% csrf_token %}
+    {{form.as_p}}
+    <button type='submit' class='employee_add_confirm_button'>Confirm</button>
+</form>
+{% endblock content %}

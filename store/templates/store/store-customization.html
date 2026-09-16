@@ -1,0 +1,17 @@
+{% extends "base-dashboard.html" %}
+
+{% block title %}Store Customization{% endblock title %}
+
+{% block content %}
+
+<h1 class='store_customization_header'>Store Customization</h1>
+
+<form method='post' class='store_customization_form' enctype="multipart/form-data">
+
+    {% csrf_token %}
+    {{form.as_p}}
+    <button type='submit' class='store_customization_confirm_button'>Confirm</button>
+
+</form>
+
+{% endblock content %}

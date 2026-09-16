@@ -1,0 +1,1737 @@
+/* =========================================================
+   SY-Market stylesheet
+   Structure:
+   1. Reset
+   2. Theme variables (data-theme: light/dark) -> neutrals
+   3. Color variables (data-color: red/yellow/.../lime) -> accent
+   4. Font variables (data-font: arial/tahoma/helvetica)
+   5. Base typography & layout
+   6. Images
+   7. Buttons & forms
+   8. Cards (generic, reused by product/category/order/etc.)
+   9. Messages / alerts
+   10. Pagination
+   ========================================================= */
+
+/* ---------- 1. Reset ---------- */
+*, *::before, *::after {
+    box-sizing: border-box;
+}
+
+html, body {
+    margin: 0;
+    padding: 0;
+    overflow-x: hidden;
+}
+
+body {
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+}
+
+ul {
+    list-style: none;
+    margin: 0;
+    padding: 0;
+}
+
+a {
+    text-decoration: none;
+    color: inherit;
+}
+
+img {
+    /* max-width: 100%; I just removed this and the banner is logging better but not keeping the aspect ratio */  
+    display: block;
+}
+
+button {
+    font: inherit;
+    cursor: pointer;
+    border: none;
+}
+
+input, select, textarea {
+    font: inherit;
+}
+
+/* ---------- 2. Theme variables (neutrals) ---------- */
+/* Fallback (no data-theme set yet, e.g. store not configured) */
+html {
+    --bg: #f7f7f8;
+    --surface: #ffffff;
+    --surface-alt: #f0f0f2;
+    --text: #1a1a1a;
+    --text-muted: #6b6b6b;
+    --border: #e0e0e0;
+    --danger: #c0392b;
+    --danger-bg: #fdecea;
+    --success: #1e7e34;
+    --success-bg: #e8f7ec;
+    --info: #31708f;
+    --info-bg: #eaf4fb;
+}
+
+html[data-theme="light"] {
+    --bg: #f7f7f8;
+    --surface: #ffffff;
+    --surface-alt: #f0f0f2;
+    --text: #1a1a1a;
+    --text-muted: #6b6b6b;
+    --border: #e0e0e0;
+}
+
+html[data-theme="dark"] {
+    --bg: #14151a;
+    --surface: #1e2027;
+    --surface-alt: #262832;
+    --text: #f0f0f2;
+    --text-muted: #a0a0aa;
+    --border: #33353f;
+    --danger-bg: #3a1f1d;
+    --success-bg: #1c3324;
+    --info-bg: #1c2c38;
+}
+
+/* ---------- 3. Color variables (accent) ---------- */
+/* Fallback accent */
+html {
+    --accent: #3b6fd6;
+    --accent-hover: #2f59ad;
+    --accent-text: #ffffff;
+}
+
+html[data-color="red"]    { --accent: #d6403b; --accent-hover: #ad2f2f; --accent-text: #ffffff; }
+html[data-color="yellow"] { --accent: #e0b400; --accent-hover: #b38f00; --accent-text: #1a1a1a; }
+html[data-color="orange"] { --accent: #e0791e; --accent-hover: #b3600f; --accent-text: #ffffff; }
+html[data-color="blue"]   { --accent: #3b6fd6; --accent-hover: #2f59ad; --accent-text: #ffffff; }
+html[data-color="teal"]   { --accent: #1c9c8a; --accent-hover: #157a6c; --accent-text: #ffffff; }
+html[data-color="purple"] { --accent: #8b5cd6; --accent-hover: #6d3fb3; --accent-text: #ffffff; }
+html[data-color="pink"]   { --accent: #d63b8f; --accent-hover: #ad2f72; --accent-text: #ffffff; }
+html[data-color="green"]  { --accent: #2f9e44; --accent-hover: #227a33; --accent-text: #ffffff; }
+html[data-color="lime"]   { --accent: #8bc21e; --accent-hover: #6c990f; --accent-text: #1a1a1a; }
+
+/* ---------- 4. Font variables ---------- */
+html {
+    --font-family: Arial, Helvetica, sans-serif; /* fallback */
+}
+html[data-font="arial"]     { --font-family: Arial, sans-serif; }
+html[data-font="tahoma"]    { --font-family: Tahoma, Geneva, sans-serif; }
+html[data-font="helvetica"] { --font-family: "Helvetica Neue", Helvetica, Arial, sans-serif; }
+
+/* ---------- 5. Base typography & layout ---------- */
+body {
+    font-family: var(--font-family);
+    background-color: var(--bg);
+    color: var(--text);
+    line-height: 1.5;
+}
+
+.base_body {
+    /* content area grows to push footer down; footer/nav styled once we see those templates */
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+}
+
+h1, h2, h3, h4, h5, h6 {
+    margin: 0 0 0.5em 0;
+    line-height: 1.25;
+}
+
+p {
+    margin: 0 0 0.5em 0;
+}
+
+/* Generic page content wrapper so every block-level page has consistent side padding.
+   NOTE: {% block content %} currently has no wrapping div - see note below templates. */
+.page_content {
+    width: 100%;
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 1.5rem 1rem;
+    flex: 1;
+}
+
+/* ---------- 6. Images ---------- */
+/* Mechanism: object-fit: cover + a fixed width/height crops any uploaded
+   image to exactly that box, regardless of its original dimensions - this is
+   what makes every image the same size no matter what was uploaded.
+   Sizes are set per-template below, targeting each template's own existing
+   class name directly (e.g. .cart_item_product_thumbnail, .dashboard_product_card img),
+   so no template edits are needed just for sizing. Rules get added here as
+   each template comes in. */
+
+/* ---------- 7. Buttons & forms ---------- */
+.btn, button, input[type="submit"] {
+    display: inline-block;
+    padding: 0.5em 1.1em;
+    border-radius: 4px;
+    background-color: var(--accent);
+    color: var(--accent-text);
+    border: 1px solid transparent;
+    font-weight: 600;
+    transition: background-color 0.15s ease;
+}
+
+button:hover, .btn:hover {
+    background-color: var(--accent-hover);
+}
+
+/* Secondary / destructive actions inside forms that share styling but need a
+   different visual weight. Apply this class to delete/cancel buttons. */
+.btn-danger {
+    background-color: var(--danger);
+    color: #ffffff;
+}
+.btn-danger:hover {
+    filter: brightness(0.85);
+}
+
+.btn-muted {
+    background-color: var(--surface-alt);
+    color: var(--text);
+    border: 1px solid var(--border);
+}
+.btn-muted:hover {
+    background-color: var(--border);
+}
+
+input:not([type="radio"]):not([type="checkbox"]):not([type="submit"]):not([type="hidden"]):not([type="file"]),
+textarea,
+select {
+    width: 100%;
+    max-width: 400px;
+    padding: 0.5em 0.7em;
+    border: 1px solid var(--border);
+    border-radius: 4px;
+    background-color: var(--surface);
+    color: var(--text);
+    box-sizing: border-box;
+}
+
+input:focus, select:focus, textarea:focus {
+    outline: 2px solid var(--accent);
+    outline-offset: 1px;
+}
+
+input[type="file"] {
+    width: 100%;
+    max-width: 400px;
+    padding: 0.5em 0;
+    color: var(--text-muted);
+    font-size: 0.9em;
+}
+input[type="file"]::file-selector-button {
+    padding: 0.4em 0.9em;
+    margin-right: 0.75rem;
+    border-radius: 4px;
+    border: 1px solid var(--border);
+    background-color: var(--surface-alt);
+    color: var(--text);
+    font-weight: 600;
+    cursor: pointer;
+}
+input[type="file"]::file-selector-button:hover {
+    background-color: var(--border);
+}
+
+/* Django's {{ form.as_p }} wraps each field in <p> - space them out */
+form p {
+    margin-bottom: 1em;
+}
+
+form p label {
+    display: block;
+    margin-bottom: 0.3em;
+    font-weight: 600;
+    color: var(--text-muted);
+}
+
+/* Field-level and non-field errors Django renders as <ul class="errorlist"> */
+.errorlist {
+    color: var(--danger);
+    font-size: 0.9em;
+    margin: 0.2em 0 0.4em 0;
+    padding: 0;
+    list-style: none;
+}
+
+/* Inline action forms (delete/toggle buttons sitting next to a card) shouldn't
+   force a line break. Apply this class to any <form> used purely as a button. */
+.inline-form {
+    display: inline-block;
+}
+
+/* ---------- 8. Cards ---------- */
+/* Every "*_card" class already in the templates (product_card, category_card,
+   dashboard_order_card, payment_card, shipment_card, employee_card, ...) is
+   caught here via an attribute *contains* selector - [class*="_card"] matches
+   any element whose class attribute includes that substring anywhere. This
+   means the generic card look applies automatically with zero template edits,
+   as long as every card div's class name contains "_card" (they all do). */
+[class*="_card"] {
+    display: flex;
+    flex-direction: column;
+    height: 100%;
+    background-color: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 6px;
+    padding: 1rem;
+    margin-bottom: 1rem;
+    transition: box-shadow 0.15s ease;
+}
+
+a:hover > [class*="_card"] {
+    box-shadow: 0 2px 10px rgba(0,0,0,0.08);
+}
+
+[class*="_card"] p {
+    overflow: hidden;
+    text-overflow: ellipsis;
+    display: -webkit-box;
+    -webkit-line-clamp: 2;
+    line-clamp: 2;
+    -webkit-box-orient: vertical;
+}
+
+/* Deactivated variants follow the "*_card_deactivated" / "*_deactivated"
+   naming convention already used throughout - same trick, no edits needed. */
+[class*="_deactivated"] {
+    opacity: 0.55;
+}
+
+/* Blocks that hold a grid of cards - templates name these "*_block"
+   (e.g. recently_added_products_block, active_orders_block). Turn them into
+   a responsive grid automatically. */
+[class$="_block"] {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
+    gap: 1rem;
+    align-items: start;
+}
+
+[class$="_grid"] {
+    align-items: stretch;
+}
+
+/* was: [class*="_card"] img { object-position: center; } */
+[class*="_card"] img {
+    width: calc(100% + 2rem);
+    height: 160px;
+    object-fit: cover;
+    object-position: center;
+    border-radius: 6px 6px 0 0;
+    margin: -1rem -1rem 0.75rem -1rem;
+}
+
+/* ---------- 9. Messages / alerts ---------- */
+.messages_container {
+    max-width: 1200px;
+    margin: 1rem auto 0 auto;
+    padding: 0 1rem;
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
+}
+
+.alert {
+    padding: 0.75em 1em;
+    border-radius: 4px;
+    border: 1px solid transparent;
+    font-size: 0.95em;
+}
+
+.alert_success { background-color: var(--success-bg); color: var(--success); border-color: var(--success); }
+.alert_error   { background-color: var(--danger-bg);  color: var(--danger);  border-color: var(--danger); }
+.alert_warning { background-color: var(--danger-bg);  color: var(--danger);  border-color: var(--danger); }
+.alert_info    { background-color: var(--info-bg);    color: var(--info);    border-color: var(--info); }
+
+/* ---------- 11. Navbar ---------- */
+.upper_navbar,
+.navbar {
+    display: flex;
+    align-items: center;
+    gap: 1.5rem;
+    padding: 0.75rem 1.5rem;
+    background-color: var(--surface);
+    border-bottom: 1px solid var(--border);
+}
+
+.upper_navbar {
+    font-size: 0.85rem;
+    background-color: var(--surface-alt);
+}
+
+.upper_navbar_item,
+.navbar_item {
+    display: inline-block;
+}
+
+.upper_navbar_item a,
+.navbar_item a {
+    color: var(--text);
+    font-weight: 600;
+    padding: 0.3em 0;
+}
+
+.upper_navbar_item a:hover,
+.navbar_item a:hover {
+    color: var(--accent);
+}
+
+/* Logo sits inside the upper bar; push it to the far right, keep it small
+   and un-cropped (contain, not cover - see note in chat). */
+.store_logo {
+    margin-left: auto;
+}
+
+.upper_navbar_logo {
+    width: 44px;
+    height: 44px;
+    object-fit: contain;
+}
+.paging, [class$="_paging"] {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+    margin-top: 1rem;
+}
+
+.page_button, [class$="_page_button"] {
+    padding: 0.35em 0.8em;
+    border-radius: 4px;
+    background-color: var(--surface-alt);
+    border: 1px solid var(--border);
+}
+
+.page_button:hover, [class$="_page_button"]:hover {
+    background-color: var(--border);
+}
+
+.current_page, [class$="_current_page"], [class$="_current_page_number"] {
+    color: var(--text-muted);
+    font-size: 0.9em;
+}
+
+
+
+
+
+/* ---------- 12. Footer ---------- */
+.footer_content {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 2rem;
+    justify-content: space-between;
+    margin-top: auto;
+    padding: 2rem 1.5rem;
+    background-color: var(--surface-alt);
+    border-top: 1px solid var(--border);
+    color: var(--text-muted);
+    font-size: 0.9rem;
+}
+
+.footer_trademark,
+.footer_about_us,
+.footer_contact_us {
+    flex: 1 1 200px;
+}
+
+.footer_content p {
+    margin: 0 0 0.4em 0;
+}
+
+.footer_store_description {
+    color: var(--text-muted);
+}
+
+.footer_contact_email,
+.footer_contact_phone {
+    color: var(--text);
+}
+
+
+/* ---------- 13. Standalone forms (add/edit pages) ---------- */
+/* Targets every *_form class used for a single add/edit page - constrains
+   width and centers it, since a full-width form for 2-3 fields looks wrong. */
+[class$="_form"] {
+    max-width: 480px;
+    margin: 0 auto;
+    padding: 1.5rem;
+    background-color: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 6px;
+}
+
+[class$="_form"] button[type="submit"] {
+    width: 100%;
+    margin-top: 0.5rem;
+}
+
+/* ---------- 14. Address list ---------- */
+.address_list_item {
+    background-color: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 6px;
+    padding: 1rem;
+    margin-bottom: 1rem;
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.4rem 0.6rem;
+    align-items: baseline;
+}
+
+.address_list_item > span {
+    color: var(--text);
+}
+
+.address_list_item_notes {
+    color: var(--text-muted);
+    font-style: italic;
+    width: 100%;
+}
+
+.address_list_item_buttons {
+    display: flex;
+    gap: 0.5rem;
+    margin-top: 0.75rem;
+    width: 100%;
+}
+
+.address_list_item_edit_button,
+.address_list_item_make_primary_button {
+    background-color: var(--surface-alt);
+    color: var(--text);
+    border: 1px solid var(--border);
+    padding: 0.35em 0.9em;
+    border-radius: 4px;
+}
+.address_list_item_edit_button:hover,
+.address_list_item_make_primary_button:hover {
+    background-color: var(--border);
+}
+
+.address_list_item_delete_button {
+    background-color: var(--danger);
+    color: #ffffff;
+}
+.address_list_item_delete_button:hover {
+    filter: brightness(0.85);
+}
+
+.address_list_add_button {
+    display: inline-block;
+    margin-bottom: 1rem;
+}
+
+
+/* ---------- 15. Auth pages ---------- */
+.register_redirect_to_login_block,
+.login_redirect_to_register_block {
+    max-width: 480px;
+    margin: 1rem auto 0 auto;
+    text-align: center;
+    color: var(--text-muted);
+    font-size: 0.9rem;
+}
+
+.register_redirect_to_login_block a,
+.login_redirect_to_register_block a {
+    color: var(--accent);
+    font-weight: 600;
+}
+
+.register_redirect_to_login_block a:hover,
+.login_redirect_to_register_block a:hover {
+    text-decoration: underline;
+}
+
+/* ---------- 16. Profile ---------- */
+.profile_info_block {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.5rem 1rem;
+    background-color: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 6px;
+    padding: 1rem 1.25rem;
+    margin-bottom: 1.5rem;
+}
+
+.profile_info_block > span {
+    color: var(--text);
+}
+
+.profile_actions {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.75rem;
+    margin-bottom: 1.5rem;
+}
+
+.profile_actions a {
+    background-color: var(--surface-alt);
+    border: 1px solid var(--border);
+    color: var(--text);
+    padding: 0.5em 1em;
+    border-radius: 4px;
+    font-weight: 600;
+}
+
+.profile_actions a:hover {
+    background-color: var(--border);
+}
+
+.profile_order_block {
+    background-color: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 6px;
+    padding: 1rem;
+}
+
+.profile_order_number {
+    font-weight: 700;
+}
+
+.profile_order_status {
+    color: var(--accent);
+    font-weight: 600;
+}
+
+.profile_shipping_address span {
+    color: var(--text-muted);
+}
+
+/* ---------- 17. Employees ---------- */
+.employee_list_header {
+    display: inline-block;
+}
+
+.search_bar_form {
+    display: flex;
+    gap: 0.5rem;
+    margin-bottom: 1rem;
+    max-width: 400px;
+}
+
+.search_bar_form input {
+    flex: 1;
+    min-width: 0;
+}
+
+.employee_add_button {
+    display: inline-block;
+    margin-bottom: 1.5rem;
+    background-color: var(--accent);
+    color: var(--accent-text);
+    padding: 0.5em 1.1em;
+    border-radius: 4px;
+    font-weight: 600;
+}
+.employee_add_button:hover {
+    background-color: var(--accent-hover);
+}
+
+.employee_card_permissions,
+.employee_permissions {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.4rem;
+    margin: 0.5rem 0;
+}
+
+.employee_card_permission_item,
+.employee_permission_item {
+    background-color: var(--surface-alt);
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    padding: 0.15em 0.7em;
+    font-size: 0.8em;
+    color: var(--text-muted);
+}
+
+.employee_card_buttons,
+.employee_detail_buttons {
+    display: flex;
+    gap: 0.5rem;
+    margin-top: 0.75rem;
+}
+
+.employee_edit_button {
+    background-color: var(--surface-alt);
+    color: var(--text);
+    border: 1px solid var(--border);
+    padding: 0.35em 0.9em;
+    border-radius: 4px;
+}
+.employee_edit_button:hover {
+    background-color: var(--border);
+}
+
+.employee_delete_button {
+    background-color: var(--danger);
+    color: #ffffff;
+}
+.employee_delete_button:hover {
+    filter: brightness(0.85);
+}
+
+.employee_toggle_active_button {
+    background-color: var(--surface-alt);
+    color: var(--text);
+    border: 1px solid var(--border);
+}
+.employee_toggle_active_button:hover {
+    background-color: var(--border);
+}
+
+.employee_detail {
+    max-width: 480px;
+}
+
+/* ---------- 18. Cart ---------- */
+.cart_items_block {
+    display: block; /* override the generic [class$="_block"] grid rule - rows, not a grid */
+}
+
+.cart_item {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+    background-color: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 6px;
+    padding: 0.75rem 1rem;
+    margin-bottom: 0.75rem;
+}
+
+.cart_item_product_thumbnail {
+    width: 64px;
+    height: 64px;
+    object-fit: cover;
+    border-radius: 4px;
+    flex-shrink: 0;
+}
+
+.cart_item_product_name_and_quantity {
+    flex: 1;
+    margin: 0;
+    font-weight: 600;
+}
+
+.cart_item_buttons {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+}
+
+.cart_item_buttons form.inline-form {
+    display: flex;
+    align-items: center;
+    gap: 0.3rem;
+}
+
+.item_quantity_increment_input,
+.item_quantity_decrement_input {
+    width: 60px;
+    max-width: 60px;
+    padding: 0.3em 0.4em;
+}
+
+.item_quantity_increment_input_button,
+.item_quantity_decrement_input_button {
+    background-color: var(--surface-alt);
+    color: var(--text);
+    border: 1px solid var(--border);
+    padding: 0.3em 0.7em;
+}
+.item_quantity_increment_input_button:hover,
+.item_quantity_decrement_input_button:hover {
+    background-color: var(--border);
+}
+
+.cart_item_delete_button {
+    background-color: var(--danger);
+    color: #ffffff;
+    padding: 0.3em 0.8em;
+}
+.cart_item_delete_button:hover {
+    filter: brightness(0.85);
+}
+
+.cart_empty_info {
+    color: var(--text-muted);
+    margin-bottom: 1rem;
+}
+
+.cart_clear_button {
+    background-color: var(--surface-alt);
+    color: var(--text);
+    border: 1px solid var(--border);
+    margin-right: 0.75rem;
+}
+.cart_clear_button:hover {
+    background-color: var(--border);
+}
+
+/* ---------- 19. Home ---------- */
+
+img[alt="Store Banner"] {
+    width: 100vw;
+    height: 260px;
+    object-fit: cover;
+    margin-bottom: 1.5rem;
+    margin-left: calc(50% - 50vw);
+    border-radius: 0;
+}
+
+
+.home_latest_categories {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.6rem;
+    margin-bottom: 2rem;
+}
+
+.home_latest_categories a {
+    background-color: var(--surface-alt);
+    border: 1px solid var(--border);
+    border-radius: 20px;
+    padding: 0.4em 1em;
+    font-weight: 600;
+    color: var(--text);
+}
+
+.home_latest_categories a:hover {
+    background-color: var(--accent);
+    color: var(--accent-text);
+    border-color: var(--accent);
+}
+
+.home_view_all_categories_button,
+.home_view_all_products_button {
+    background-color: var(--surface);
+    border: 1px solid var(--border) !important;
+    color: var(--accent) !important;
+}
+.home_view_all_categories_button:hover,
+.home_view_all_products_button:hover {
+    background-color: var(--surface-alt);
+}
+
+.home_latest_products {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
+    gap: 1rem;
+}
+
+.home_view_all_products_button {
+    grid-column: 1 / -1;
+    justify-self: start;
+    margin-bottom: 0.5rem;
+}
+
+.home_product_card_image {
+    width: 100%;
+    height: 160px;
+    object-fit: cover;
+    border-radius: 6px 6px 0 0;
+    margin: -1rem -1rem 0.75rem -1rem;
+    width: calc(100% + 2rem);
+}
+
+.product_card_category {
+    color: var(--text-muted);
+    font-size: 0.85em;
+}
+
+.product_card_price {
+    font-weight: 700;
+    color: var(--accent);
+}
+
+/* ---------- 20. Category list / detail ---------- */
+.category_list_grid,
+.category_products_grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
+    gap: 1rem;
+    margin-top: 1rem;
+}
+
+.category_search_form {
+    display: flex;
+    gap: 0.5rem;
+    max-width: 400px;
+}
+.category_search_form input {
+    flex: 1;
+    min-width: 0;
+}
+
+.category_list_item_name {
+    font-weight: 700;
+    font-size: 1.05em;
+}
+
+.category_list_item_description {
+    color: var(--text-muted);
+    font-size: 0.9em;
+}
+
+.category_detail_name {
+    font-size: 1.4rem;
+    font-weight: 700;
+}
+
+.category_detail_description {
+    color: var(--text-muted);
+    margin-bottom: 1.5rem;
+}
+
+.category_detail_view_more_products_button {
+    display: inline-block;
+    margin-top: 1rem;
+    background-color: var(--surface);
+    border: 1px solid var(--border);
+    color: var(--accent);
+}
+.category_detail_view_more_products_button:hover {
+    background-color: var(--surface-alt);
+}
+
+.product_card img {
+    width: calc(100% + 2rem);
+    height: 160px;
+    object-fit: cover;
+    border-radius: 6px 6px 0 0;
+    margin: -1rem -1rem 0.75rem -1rem;
+}
+
+.product_card_average_rating {
+    color: var(--text-muted);
+    font-size: 0.85em;
+}
+
+/* ---------- 21. Dashboard category/product management ---------- */
+.category_add_button {
+    display: inline-block;
+    margin: 0 0 1.5rem 0;
+    background-color: var(--accent);
+    color: var(--accent-text);
+    padding: 0.5em 1.1em;
+    border-radius: 4px;
+    font-weight: 600;
+}
+.category_add_button:hover {
+    background-color: var(--accent-hover);
+}
+
+.dashboard_category_grid,
+.dashboard_category_products_grid,
+.dashboard_product_grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
+    gap: 1rem;
+    margin-top: 1rem;
+}
+
+.category_detail_buttons,
+.dashboard_product_detail_buttons {
+    display: flex;
+    gap: 0.5rem;
+    margin: 1rem 0 1.5rem 0;
+}
+
+.category_edit_button,
+.product_edit_button {
+    background-color: var(--surface-alt);
+    color: var(--text);
+    border: 1px solid var(--border);
+    padding: 0.5em 1.1em;
+    border-radius: 4px;
+    font-weight: 600;
+}
+.category_edit_button:hover,
+.product_edit_button:hover {
+    background-color: var(--border);
+}
+
+.category_delete_button,
+.product_delete_button {
+    background-color: var(--danger);
+    color: #ffffff;
+}
+.category_delete_button:hover,
+.product_delete_button:hover {
+    filter: brightness(0.85);
+}
+
+.category_toggle_active_button,
+.product_toggle_active_button {
+    background-color: var(--surface-alt);
+    color: var(--text);
+    border: 1px solid var(--border);
+}
+.category_toggle_active_button:hover,
+.product_toggle_active_button:hover {
+    background-color: var(--border);
+}
+
+.category_detail_is_active,
+.dashboard_product_card_is_active {
+    display: inline-block;
+    font-size: 0.8em;
+    font-weight: 700;
+    text-transform: uppercase;
+    color: var(--success);
+    background-color: var(--success-bg);
+    padding: 0.15em 0.7em;
+    border-radius: 12px;
+}
+
+.dashboard_product_search_form {
+    display: flex;
+    gap: 0.5rem;
+    max-width: 400px;
+    margin-bottom: 1rem;
+}
+.dashboard_product_search_form input[type="text"] {
+    flex: 1;
+    min-width: 0;
+}
+
+.product_add_button {
+    display: inline-block;
+    margin-bottom: 1.5rem;
+    background-color: var(--accent);
+    color: var(--accent-text);
+    padding: 0.5em 1.1em;
+    border-radius: 4px;
+    font-weight: 600;
+}
+.product_add_button:hover {
+    background-color: var(--accent-hover);
+}
+
+.dashboard_category_card img,
+.dashboard_product_card img {
+    width: calc(100% + 2rem);
+    height: 150px;
+    object-fit: cover;
+    border-radius: 6px 6px 0 0;
+    margin: -1rem -1rem 0.75rem -1rem;
+}
+
+.dashboard_product_images {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.75rem;
+    margin: 1rem 0 1.5rem 0;
+}
+
+.dashboard_product_image {
+    background-color: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 6px;
+    padding: 0.5rem;
+    text-align: center;
+}
+
+.dashboard_product_image img {
+    width: 100px;
+    height: 100px;
+    object-fit: cover;
+    border-radius: 4px;
+    margin-bottom: 0.4rem;
+}
+
+.dashboard_product_image_delete {
+    background-color: var(--danger);
+    color: #ffffff;
+    font-size: 0.8em;
+    padding: 0.25em 0.6em;
+}
+.dashboard_product_image_delete:hover {
+    filter: brightness(0.85);
+}
+
+.dashboard_product_review_card_rating {
+    font-weight: 700;
+    color: var(--accent);
+}
+
+.dashboard_product_review_card_user {
+    font-weight: 600;
+}
+
+.dashboard_product_review_card_comment {
+    color: var(--text-muted);
+}
+
+.dashboard_product_review_card_created_at {
+    font-size: 0.8em;
+    color: var(--text-muted);
+}
+
+/* ---------- 22. Public product list / detail ---------- */
+.product_list_header {
+    display: inline-block;
+}
+
+.product_search_form {
+    display: flex;
+    gap: 0.5rem;
+    max-width: 400px;
+    margin-bottom: 1rem;
+}
+.product_search_form input {
+    flex: 1;
+    min-width: 0;
+}
+
+.product_list_grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
+    gap: 1rem;
+}
+
+.product_card_avg_rating {
+    color: var(--text-muted);
+    font-size: 0.85em;
+}
+
+/* Product detail page: stock/add-to-cart block */
+.product_stock {
+    margin: 1rem 0 1.5rem 0;
+}
+
+.product_stock form {
+    display: flex;
+    gap: 0.5rem;
+    align-items: center;
+    max-width: 260px;
+}
+
+.product_stock input[type="number"] {
+    max-width: 80px;
+}
+
+.product_add_to_cart_button,
+.product_anonymous_add_to_cart_button {
+    background-color: var(--accent);
+    color: var(--accent-text);
+    padding: 0.5em 1.2em;
+    border-radius: 4px;
+    font-weight: 600;
+}
+.product_add_to_cart_button:hover,
+.product_anonymous_add_to_cart_button:hover {
+    background-color: var(--accent-hover);
+}
+
+/* Product gallery images */
+.product_images_grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
+    gap: 0.75rem;
+    margin: 1rem 0 1.5rem 0;
+}
+.product_images_grid img {
+    width: 100%;
+    height: 150px;
+    object-fit: cover;
+    border-radius: 6px;
+}
+
+/* Customer's own review, and review add/edit links */
+.product_customer_review {
+    background-color: var(--surface);
+    border: 1px solid var(--accent);
+    border-radius: 6px;
+    padding: 1rem;
+    margin-bottom: 1.5rem;
+}
+
+.product_customer_review_rating {
+    font-weight: 700;
+    color: var(--accent);
+}
+
+.review_edit_button {
+    background-color: var(--surface-alt);
+    color: var(--text);
+    border: 1px solid var(--border);
+    padding: 0.35em 0.9em;
+    border-radius: 4px;
+    display: inline-block;
+    margin-left: 0.5rem;
+}
+.review_edit_button:hover {
+    background-color: var(--border);
+}
+
+.review_delete_button {
+    background-color: var(--danger);
+    color: #ffffff;
+}
+.review_delete_button:hover {
+    filter: brightness(0.85);
+}
+
+/* General reviews list */
+.product_review_card_rating {
+    font-weight: 700;
+    color: var(--accent);
+}
+
+.product_review_card_user {
+    font-weight: 600;
+}
+
+.product_review_card_comment {
+    color: var(--text-muted);
+}
+
+.product_review_card_created_at {
+    font-size: 0.8em;
+    color: var(--text-muted);
+}
+
+/* ---------- 23. Dashboard home ---------- */
+.dashboard_home_header {
+    margin-bottom: 1.5rem;
+}
+
+h3 {
+    margin-top: 2rem;
+}
+
+[class^="no_"] {
+    color: var(--text-muted);
+    font-style: italic;
+    grid-column: 1 / -1;
+}
+
+.dashboard_categories_view_all_button,
+.dashboard_products_view_all_button,
+.dashboard_orders_view_all_button,
+.dashboard_shipments_view_all_button,
+.dashboard_payments_view_all_button {
+    display: inline-block;
+    margin-top: 0.5rem;
+    background-color: var(--surface);
+    border: 1px solid var(--border);
+    color: var(--accent);
+    padding: 0.4em 1em;
+    border-radius: 4px;
+    font-size: 0.9em;
+}
+.dashboard_categories_view_all_button:hover,
+.dashboard_products_view_all_button:hover,
+.dashboard_orders_view_all_button:hover,
+.dashboard_shipments_view_all_button:hover,
+.dashboard_payments_view_all_button:hover {
+    background-color: var(--surface-alt);
+}
+
+/* Active orders: wider stacked cards instead of the generic grid, since each
+   card holds a lot of text (address, phone, price, date). */
+.active_orders_block {
+    display: block;
+}
+
+.dashboard_active_order_card {
+    max-width: 700px;
+}
+
+.dashboard_active_order_item_number {
+    font-weight: 700;
+}
+
+.dashboard_active_order_item_status {
+    color: var(--accent);
+    font-weight: 600;
+}
+
+.dashboard_active_order_item_total_price {
+    font-weight: 600;
+}
+
+.dashboard_active_order_item_address,
+.dashboard_active_order_item_contact_number,
+.dashboard_active_order_item_created_at {
+    color: var(--text-muted);
+    font-size: 0.9em;
+}
+
+/* ---------- 24. Checkout ---------- */
+.checkout_cart_items_block {
+    margin-bottom: 2rem;
+}
+
+.checkout_addresses_block {
+    margin-bottom: 2rem;
+}
+
+.address_list_item_label {
+    display: flex;
+    align-items: flex-start;
+    gap: 0.75rem;
+    cursor: pointer;
+    margin-bottom: 0.75rem;
+}
+
+.address_list_item_label input[type="radio"] {
+    margin-top: 1.2rem;
+    accent-color: var(--accent);
+    width: 18px;
+    height: 18px;
+    cursor: pointer;
+}
+
+.address_list_item_label .address_list_item {
+    flex: 1;
+    margin-bottom: 0;
+    transition: border-color 0.15s ease, box-shadow 0.15s ease;
+}
+
+/* Highlight card when radio is checked */
+.address_list_item_label input[type="radio"]:checked + .address_list_item {
+    border-color: var(--accent);
+    background-color: var(--surface);
+    box-shadow: 0 0 0 1px var(--accent);
+}
+
+.checkout_primary_address_mark {
+    display: inline-block;
+    font-size: 0.75em;
+    font-weight: 700;
+    text-transform: uppercase;
+    color: var(--accent);
+    background-color: var(--info-bg);
+    padding: 0.15em 0.6em;
+    border-radius: 12px;
+    width: 100%;
+    margin-bottom: 0.25rem;
+}
+
+.checkout_no_addresses {
+    color: var(--text-muted);
+    font-style: italic;
+    margin-bottom: 1rem;
+}
+
+.checkout_add_address_button {
+    display: inline-block;
+    background-color: var(--surface-alt);
+    color: var(--text);
+    border: 1px solid var(--border);
+    padding: 0.4em 1em;
+    border-radius: 4px;
+    font-weight: 600;
+    margin-top: 0.5rem;
+}
+
+.checkout_add_address_button:hover {
+    background-color: var(--border);
+}
+
+.checkout_place_order_form {
+    margin-top: 1.5rem;
+    padding-top: 1rem;
+    border-top: 1px solid var(--border);
+}
+
+.checkout_place_order_button {
+    width: 100%;
+    max-width: 320px;
+    padding: 0.75em 1.5em;
+    font-size: 1.05rem;
+    background-color: var(--accent);
+    color: var(--accent-text);
+}
+
+.checkout_place_order_button:hover {
+    background-color: var(--accent-hover);
+}
+
+/* ---------- 25. Order detail (customer) ---------- */
+.customer_order_items_block {
+    display: block; /* rows, not a grid — same override as cart_items_block */
+}
+
+.order_item_status {
+    color: var(--accent);
+    font-weight: 600;
+}
+
+.order_item_shipment_status,
+.order_item_payment_status {
+    color: var(--text-muted);
+    font-size: 0.9em;
+}
+
+.order_item_total_price {
+    font-weight: 700;
+}
+
+.order_item_shipping_address span {
+    margin-right: 0.2em;
+}
+
+.order_item_created_at {
+    color: var(--text-muted);
+    font-size: 0.85em;
+}
+
+.order_cancel_button {
+    background-color: var(--danger);
+    color: #ffffff;
+    margin-bottom: 1.5rem;
+}
+.order_cancel_button:hover {
+    filter: brightness(0.85);
+}
+
+.customer_order_item_product {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+}
+
+.customer_order_item_product img {
+    width: 64px;
+    height: 64px;
+    object-fit: cover;
+    border-radius: 4px;
+    flex-shrink: 0;
+}
+
+.customer_order_item_product_name_quantity {
+    flex: 1;
+    margin: 0;
+    font-weight: 600;
+}
+
+.customer_order_item_unit_price_and_subtotal {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-end;
+    gap: 0.2rem;
+    margin: 0;
+    font-size: 0.9em;
+    color: var(--text-muted);
+    white-space: nowrap;
+}
+
+/* ---------- 26. Order list (customer) ---------- */
+.customer_order_search_form {
+    display: flex;
+    gap: 0.5rem;
+    margin-bottom: 1rem;
+}
+.customer_order_search_form input {
+    flex: 1;
+    min-width: 0;
+}
+
+.orders_empty_list {
+    color: var(--text-muted);
+    font-style: italic;
+    margin: 1rem 0;
+}
+
+/* ---------- 27. Dashboard orders (list & detail) ---------- */
+.order_list_search_form {
+    display: flex;
+    gap: 0.5rem;
+    margin-bottom: 1.5rem;
+    max-width: 400px;
+}
+.order_list_search_form input {
+    flex: 1;
+    min-width: 0;
+}
+
+.order_item_customer {
+    font-weight: 600;
+}
+
+.ongoing_order_list_block,
+.dashboard_fulfilled_order_list_block {
+    display: block; /* wide stacked cards, not a grid — same pattern as active_orders_block */
+}
+
+.dashboard_order_card {
+    max-width: 700px;
+}
+
+.order_status_update_form {
+    display: flex;
+    gap: 0.5rem;
+    align-items: center;
+    max-width: 480px;
+    margin: 0 0 1.5rem 0; /* override the centered/boxed [class$="_form"] default */
+    padding: 0;
+    background: none;
+    border: none;
+}
+
+.order_status_update_form select {
+    flex: 1;
+    max-width: none;
+}
+
+.order_status_update_form button[type="submit"] {
+    width: auto; /* override the generic [class$="_form"] full-width submit button */
+    margin-top: 0;
+}
+
+.dashboard_order_items_block {
+    display: block; /* rows, not a grid — same override as customer_order_items_block */
+}
+
+.dashboard_order_item_product {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+}
+
+.dashboard_order_item_product img {
+    width: 64px;
+    height: 64px;
+    object-fit: cover;
+    border-radius: 4px;
+    flex-shrink: 0;
+}
+
+.dashboard_order_item_product_name_quantity {
+    flex: 1;
+    margin: 0;
+    font-weight: 600;
+}
+
+.dashboard_order_item_unit_price_and_subtotal {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-end;
+    gap: 0.2rem;
+    margin: 0;
+    font-size: 0.9em;
+    color: var(--text-muted);
+    white-space: nowrap;
+}
+
+/* ---------- 28. Payments (list & detail) ---------- */
+.payment_search_form {
+    display: flex;
+    gap: 0.5rem;
+    margin-bottom: 1rem;
+}
+.payment_search_form input {
+    flex: 1;
+    min-width: 0;
+}
+
+.payment_card_payment_status {
+    color: var(--accent);
+    font-weight: 600;
+}
+
+.payment_card_amount {
+    font-weight: 700;
+}
+
+.payment_card_updated_at,
+.payment_card_transaction_id {
+    color: var(--text-muted);
+    font-size: 0.9em;
+}
+
+.payment_status_update_form {
+    display: flex;
+    gap: 0.5rem;
+    align-items: center;
+    max-width: 400px;
+    margin: 0.75rem 0 0 0; /* override the centered/boxed [class$="_form"] default */
+    padding: 0;
+    background: none;
+    border: none;
+}
+
+.payment_status_update_form select {
+    flex: 1;
+    max-width: none;
+}
+
+.payment_status_confirm_button {
+    width: auto; /* override the generic [class$="_form"] full-width submit button */
+    margin-top: 0;
+}
+
+
+/* ---------- 29. Shipments (list & detail) ---------- */
+.shipment_search_form {
+    display: flex;
+    gap: 0.5rem;
+    margin-bottom: 1rem;
+}
+.shipment_search_form input {
+    flex: 1;
+    min-width: 0;
+}
+
+.shipment_card_status {
+    color: var(--accent);
+    font-weight: 600;
+}
+
+.shipment_card_tracking_number,
+.shipment_card_last_update {
+    color: var(--text-muted);
+    font-size: 0.9em;
+}
+
+.shipment_status_update_form,
+.shipment_assign_tracking_number_form {
+    display: flex;
+    gap: 0.5rem;
+    align-items: center;
+    max-width: 400px;
+    margin: 0.75rem 0 0 0; /* override the centered/boxed [class$="_form"] default */
+    padding: 0;
+    background: none;
+    border: none;
+}
+
+.shipment_status_update_form select,
+/* ---------- 33. Fix: specificity war between the global input reset and
+   .shipment_assign_tracking_number_form's flex layout - the :not()-heavy
+   selector in Section 7 out-specifies the plain single-class override, so
+   this needs an equally targeted rule to actually win. ---------- */
+.shipment_assign_tracking_number_form input[type="text"] {
+    flex: 1 1 auto;
+    width: auto;
+    max-width: none;
+    min-width: 0;
+}
+
+.shipment_status_confirm_button,
+.shipment_assign_tracking_number_button {
+    width: auto; /* override the generic [class$="_form"] full-width submit button */
+    margin-top: 0;
+    white-space: nowrap;
+}
+
+
+/* ---------- 30. Store settings & customization ---------- */
+.store_settings_toggle_active_form {
+    display: inline-block;
+    max-width: none;
+    margin: 1rem 0 0 0; /* override the centered/boxed [class$="_form"] default */
+    padding: 0;
+    background: none;
+    border: none;
+}
+
+.store_settings_toggle_active_form button[type="submit"] {
+    width: auto; /* override the generic [class$="_form"] full-width submit button */
+    margin-top: 0;
+}
+
+.store_settings_activate_button {
+    background-color: var(--success);
+    color: #ffffff;
+}
+.store_settings_activate_button:hover {
+    filter: brightness(0.9);
+}
+
+.store_settings_deactivate_button {
+    background-color: var(--danger);
+    color: #ffffff;
+}
+.store_settings_deactivate_button:hover {
+    filter: brightness(0.85);
+}
+
+/* new */
+.product_card_detail {
+    max-width: 600px;
+}
+
+.product_card_detail img {
+    width: calc(100% + 2rem);
+    height: 320px;
+}
+
+.cart_checkout_button {
+    display: inline-block;
+    padding: 0.5em 1.1em;
+    border-radius: 4px;
+    background-color: var(--accent);
+    color: var(--accent-text);
+    font-weight: 600;
+    transition: background-color 0.15s ease;
+}
+.cart_checkout_button:hover {
+    background-color: var(--accent-hover);
+}
+
+/* ---------- 31. Fix: un-cap bleed images clamped by the global img max-width reset ---------- */
+[class*="_card"] img,
+.home_product_card_image,
+.product_card_detail img {
+    max-width: none;
+}
+
+
+.category_search_form input,
+.product_search_form input,
+.customer_order_search_form input,
+.order_list_search_form input,
+.payment_search_form input,
+.shipment_search_form input {
+    min-width: 0;
+}
+
+
+.store_customization_form input[type="checkbox"][name$="-clear"] {
+    width: auto;
+    margin: 0 0.3em 0 0.7rem;
+    vertical-align: middle;
+}
+
+.store_customization_form input[type="checkbox"][name$="-clear"] + label {
+    display: inline;
+    font-weight: 400;
+    color: var(--text-muted);
+}
+
+.store_customization_form input[type="file"] {
+    display: block;
+    margin-top: 0.4rem;
+}
+
+.store_customization_form p a {
+    color: var(--accent);
+    word-break: break-all;
+}
+
+
+/* ---------- 32. Fix: search-bar buttons shouldn't inherit the full-width submit-button rule ---------- */
+.search_bar_form button[type="submit"],
+.category_search_form button[type="submit"],
+.dashboard_product_search_form button[type="submit"],
+.product_search_form button[type="submit"],
+.customer_order_search_form button[type="submit"],
+.order_list_search_form button[type="submit"],
+.payment_search_form button[type="submit"],
+.shipment_search_form button[type="submit"] {
+    width: auto;
+    margin-top: 0;
+    white-space: nowrap;
+}

@@ -1,0 +1,22 @@
+<div class='footer_content'>
+
+<div class='footer_trademark'>
+<p>SY-Market&copy;. All rights reserved.</p>
+</div>
+
+{% if store_description %}
+<div class='footer_about_us'>
+<p>About us:</p>
+<p class='footer_store_description'>{{store_description}}</p>
+</div>
+{% endif %}
+
+<div class='footer_contact_us'>
+{% if store_contact_email or store_contact_phone %}
+<p>Contact us:</p>
+{% if store_contact_email %}<p class='footer_contact_email'>{{store_contact_email}}</p>{% endif %}
+{% if store_contact_phone %}<p class='footer_contact_phone'>{{store_contact_phone}}</p>{% endif %}
+{% endif %}
+</div>
+
+</div>

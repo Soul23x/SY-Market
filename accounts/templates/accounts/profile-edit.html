@@ -1,0 +1,11 @@
+{% extends "base.html" %}
+
+{% block title %}Profile Update{% endblock title %}
+
+{% block content %}
+<form class='profile_edit_form' method='post'>
+    {% csrf_token %}
+    {{form.as_p}}
+    <button type='submit' class='profile_edit_button'>Save</button>
+</form>
+{% endblock content %}

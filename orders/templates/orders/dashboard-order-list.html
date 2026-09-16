@@ -1,0 +1,110 @@
+{% extends "base-dashboard.html" %}
+
+{% block title %}Orders{% endblock title %}
+
+{% block content %}
+
+<h1 class='dashboard_order_list_header'>Orders</h1>
+
+<form method='get' class='order_list_search_form'>
+    <input type="text" name='search' value="{{request.GET.search}}" placeholder='Search Orders'>
+    <button type='submit' class='order_list_search_button'>Search</button>
+</form>
+
+
+<h3 class='dashboard_ongoing_order_list_header'>Ongoing</h3>
+<div class='ongoing_order_list_block'>
+
+
+    {% for order in ongoing_orders %}
+    <a href="{% url 'dashboard_order_detail' order.id %}">
+        <div class='dashboard_order_card'>
+            <p class='order_item_number'>Order: {{order.order_number}}</p>
+            <p class='order_item_status'>Status: {{order.order_status}}</p>
+            <p class='order_item_shipment_status'>Shipment Status: {% if order.shipment %}{{order.shipment.shipment_status}}{% else %} Not Yet Shipped! {% endif %}</p>
+            <p class='order_item_payment_status'>Payment Status: {{order.payment.payment_status}}</p>
+            <p class='order_item_total_price'>Total Price: {{order.total_price}}</p>
+            <p class='order_item_customer'>Customer: {{order.customer.user.first_name}} {{order.customer.user.last_name}}</p>
+            <p class='order_item_customer_phone_number'>Customer Phone Number: {{order.customer_phone_number}}</p>
+            <p class='order_item_shipping_address'>Address: 
+                <span class='order_item_shipping_address_governorate'>{{order.shipping_address.governorate}}, </span>
+                <span class='order_item_shipping_address_city'>{{order.shipping_address.city}}, </span>
+                <span class='order_item_shipping_address_street'>{{order.shipping_address.street}}, </span>
+                <span class='order_item_shipping_address_building'>{{order.shipping_address.building}}</span>
+                {% if order.shipping_address.unit %}
+                <span class='order_item_shipping_address_unit'>{{order.shipping_address.unit}}</span>
+                {% endif %}
+                {% if order.shipping_address.notes %}
+                <span class='order_item_shipping_address_notes'>{{order.shipping_address.notes}}</span>
+                {% endif %}
+            </p>
+            <p class='order_item_created_at'>Created At: {{order.created_at}}</p>
+        </div>
+    </a>
+    {% empty %}
+    <p class='no_ongoing_orders'>No Ongoing Orders</p>
+    {% endfor %}
+
+
+    <div class='ongoing_orders_paging'>
+        {% if ongoing_orders.has_previous %}
+        <a href="?search={{request.GET.search}}&ongoing_orders_page={{ongoing_orders.previous_page_number}}" class='ongoing_orders_previous_page_button'>{{ongoing_orders.previous_page_number}}</a>
+        {% endif %}
+        <span class='ongoing_orders_current_page_number'>{{ongoing_orders.number}}</span>
+        {% if ongoing_orders.has_next %}
+        <a href="?search={{request.GET.search}}&ongoing_orders_page={{ongoing_orders.next_page_number}}" class='ongoing_orders_next_page_button'>{{ongoing_orders.next_page_number}}</a>
+        {% endif %}
+    </div>
+
+</div>
+
+
+<h3 class='dashboard_fulfilled_order_list_header'>Fulfilled</h3>
+<div class='dashboard_fulfilled_order_list_block'>
+    
+
+    {% for order in fulfilled_orders %}
+    <a href="{% url 'dashboard_order_detail' order.id %}">
+        <div class='dashboard_order_card'>
+            <p class='order_item_number'>Order: {{order.order_number}}</p>
+            <p class='order_item_status'>Status: {{order.order_status}}</p>
+            <p class='order_item_shipment_status'>Shipment Status: {{order.shipment.shipment_status}}</p>
+            <p class='order_item_payment_status'>Payment Status: {{order.payment.payment_status}}</p>
+            <p class='order_item_total_price'>Total Price: {{order.total_price}}</p>
+            <p class='order_item_customer'>Customer: {{order.customer.user.first_name}} {{order.customer.user.last_name}}</p>
+            <p class='order_item_customer_phone_number'>Customer Phone Number: {{order.customer_phone_number}}</p>
+            <p class='order_item_shipping_address'>Address: 
+                <span class='order_item_shipping_address_governorate'>{{order.shipping_address.governorate}}, </span>
+                <span class='order_item_shipping_address_city'>{{order.shipping_address.city}}, </span>
+                <span class='order_item_shipping_address_street'>{{order.shipping_address.street}}, </span>
+                <span class='order_item_shipping_address_building'>{{order.shipping_address.building}}</span>
+                {% if order.shipping_address.unit %}
+                <span class='order_item_shipping_address_unit'>{{order.shipping_address.unit}}</span>
+                {% endif %}
+                {% if order.shipping_address.notes %}
+                <span class='order_item_shipping_address_notes'>{{order.shipping_address.notes}}</span>
+                {% endif %}
+            </p>
+            <p class='order_item_created_at'>Created At: {{order.created_at}}</p>
+        </div>
+    </a>
+    {% empty %}
+    <p class='no_fulfilled_orders'>No Fulfilled Orders</p>
+    {% endfor %}
+
+
+    <div class='fulfilled_orders_paging'>
+        {% if fulfilled_orders.has_previous %}
+        <a href="?search={{request.GET.search}}&fulfilled_orders_page={{fulfilled_orders.previous_page_number}}" class='fulfilled_orders_previous_page_button'>{{fulfilled_orders.previous_page_number}}</a>
+        {% endif %}
+        <span class='fulfilled_orders_current_page_number'>{{fulfilled_orders.number}}</span>
+        {% if fulfilled_orders.has_next %}
+        <a href="?search={{request.GET.search}}&fulfilled_orders_page={{fulfilled_orders.next_page_number}}" class='fulfilled_orders_next_page_button'>{{fulfilled_orders.next_page_number}}</a>
+        {% endif %}
+    </div>
+
+</div>
+
+
+
+{% endblock content %}

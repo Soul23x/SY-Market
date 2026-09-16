@@ -1,0 +1,45 @@
+{% extends "base-dashboard.html" %}
+
+
+{% block title %}Shipment Detail{% endblock title %}
+
+{% block content %}
+
+<a href="{% url 'shipment_detail' shipment.id %}">
+    <h1 class='shipment_detail_header'>Shipment Detail</h1>
+</a>
+
+<div class='shipment_card'>
+    <p class='shipment_card_order_number'>Order: {{shipment.order.order_number}}</p>
+    {% if shipment.tracking_number %}
+    <p class='shipment_card_tracking_number'>Tracking Number: {{shipment.tracking_number}}</p>
+    {% endif %}
+    <p class='shipment_card_status'>Status: {{shipment.shipment_status}}</p>
+    <p class='shipment_card_last_update'>Last Update: {{shipment.updated_at}}</p>
+
+    {% if shipment_status_choices %}
+    <form method='post' action="{% url 'shipment_status_update' shipment.id %}" class='shipment_status_update_form'>
+    {% csrf_token %}
+    <select name="status" class='shipment_status_update_choices'>
+        {% for status,label in shipment_status_choices %}
+        <option value="{{status}}" {% if status == shipment.shipment_status %}selected{% endif %}>{{label}}</option>
+        {% endfor %}
+    </select>
+    <button type='submit' class='shipment_status_confirm_button'>Confirm</button>
+    </form>
+    {% endif %}
+
+    <form method='post' action="{% url 'shipment_assign_tracking_number' shipment.id %}" class='shipment_assign_tracking_number_form'>
+        {% csrf_token %}
+        {% if shipment.tracking_number %}
+        <input type="text" name='tracking_number' value="{{shipment.tracking_number}}">
+        <button type='submit' class='shipment_assign_tracking_number_button'>Change Tracking Number</button>
+        {% else %}
+        <input type="text" name='tracking_number'>
+        <button type='submit' class='shipment_assign_tracking_number_button'>Assign Tracking Number</button>
+        {% endif %}
+    </form>
+
+</div>
+
+{% endblock content %}

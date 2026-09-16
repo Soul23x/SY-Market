@@ -1,0 +1,46 @@
+{% extends "base.html" %}
+
+
+{% block title %}Profile{% endblock title %}
+
+{% block content %}
+
+<p class='profile_info_block'>
+    <span class='profile_username'>{{user.username}}</span>
+    <span class='profile_first_name'>{{user.first_name}}</span>
+    <span class='profile_last_name'>{{user.last_name}}</span>
+    <span class='profile_email'>{{user.email}}</span>
+    <span class='profile_phone_number'>{{user.phone_number}}</span>
+</p>
+
+<div class='profile_actions'>
+    <a class='profile_edit_button' href="{% url 'profile_edit' %}">Edit Profile</a>
+    <a class='profile_change_password_button' href="{% url 'change_password' %}">Change Password</a>
+    <a class='profile_addresses_button' href="{% url 'address_list' %}">My Addresses</a>
+    <a class='profile_order_history_button' href="{% url 'customer_order_list' %}">Order History</a>
+</div>
+
+{% if ongoing_orders %}
+{% for order in ongoing_orders %}
+<a href="{% url 'customer_order_detail' order.id %}">
+<div class='profile_order_block'>
+    <p class='profile_order_number'>Order Number: {{order.order_number}}</p>
+    <p class='profile_order_status'>Order Status: {{order.order_status}}</p>
+    <p class='profile_shipping_address'>Shipping Address: 
+        <span class='profile_shipping_address_governorate'>{{order.shipping_address.governorate}}</span>
+        <span class='profile_shipping_address_city'>{{order.shipping_address.city}}</span>
+        <span class='profile_shipping_address_street'>{{order.shipping_address.street}}</span>
+        <span class='profile_shipping_address_building'>{{order.shipping_address.building}}</span>
+        {% if order.shipping_address.unit %}
+        <span class='profile_shipping_address_unit'>{{order.shipping_address.unit}}</span>
+        {% endif %}
+        {% if order.shipping_address.notes %}
+        <span class='profile_shipping_address_notes'>{{order.shipping_address.notes}}</span>
+        {% endif %}
+    </p>
+</div>
+</a>
+{% endfor %}
+{% endif %}
+
+{% endblock content %}

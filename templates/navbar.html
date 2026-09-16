@@ -1,0 +1,38 @@
+
+{% if user.is_authenticated %}
+
+<ul class='upper_navbar'>
+    <li class='upper_navbar_item'><a href="{% url 'profile' %}">Profile</a></li>
+    <li class='upper_navbar_item'><a href="{% url 'logout' %}">Logout</a></li>
+    {% if logo %}
+    <li class='store_logo'><img src="{{logo.url}}" alt="{{alt_logo}}" class='upper_navbar_logo'></li>
+    {% endif %}
+</ul>
+
+<ul class='navbar'>
+
+    {% if user.employee or user.store_owner %}
+    <li class='navbar_item'><a href="{% url 'dashboard_home' %}">Dashboard</a></li>
+    {% endif %}
+
+    <li class='navbar_item'><a href="{% url 'home' %}">Home</a></li>
+    <li class='navbar_item'><a href="{% url 'category_list' %}">Categories</a></li>
+    <li class='navbar_item'><a href="{% url 'cart_detail' %}">Cart</a></li>
+    {% if user.customer.orders %}
+    <li class='navbar_item'><a href="{% url 'customer_order_list' %}">Orders</a></li>
+    {% endif %}
+</ul>
+
+{% else %}
+<ul class='upper_navbar'>
+    <li class='upper_navbar_item'><a href="{% url 'login' %}">Login</a></li>
+    {% if logo %}
+    <li class='store_logo'><img src="{{logo.url}}" alt="{{alt_logo}}" class='upper_navbar_logo'></li>
+    {% endif %}
+</ul>
+<ul class='navbar'>
+    <li class='navbar_item'><a href="{% url 'home' %}">Home</a></li>
+    <li class='navbar_item'><a href="{% url 'category_list' %}">Categories</a></li>
+</ul>
+
+{% endif %}

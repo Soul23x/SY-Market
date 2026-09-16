@@ -1,0 +1,75 @@
+<!--
+we should show products in this category, a show more products button
+that redirects to products by category (add GET category on dashboard products)
+also add the CRUD buttons
+-->
+
+{% extends "base-dashboard.html" %}
+
+{% block title %}Category Detail{% endblock title %}
+
+{% block content %}
+
+<h1 class='category_detail_header'>Category Detail</h1>
+
+
+<p class='category_detail_name'>{{category.name}}</p>
+<p class='category_detail_description'>{{category.description}}</p>
+{% if category.is_active %}
+<p class='category_detail_is_active'>Active</p>
+{% else %}
+<p class='category_detail_is_active'>Deactivated</p>
+{% endif %}
+
+<div class='category_detail_buttons'>
+<a href="{% url 'category_edit' category.id %}" class='category_edit_button'>Edit Category</a>
+<form method='post' action="{% url 'category_delete' category.id %}" class='inline-form'>
+    {% csrf_token %}
+    <button type='submit' class='category_delete_button'>Delete</button>
+</form>
+<form method='post' action="{% url 'category_toggle_active' category.id %}" class='inline-form'>
+    {% csrf_token %}
+    {% if category.is_active and category.name != 'uncategorized' %}
+    <button type='submit' class='category_toggle_active_button'>Deactivate</button>
+    {% else %}
+    {% if category.name != 'uncategorized' %}
+    <button type='submit' class='category_toggle_active_button'>Activate</button>
+    {% endif %}
+    {% endif %}
+</form>
+</div>
+
+<div class="dashboard_category_products_grid">
+{% for product in category_products %}
+{% if product.is_active %}
+<a href="{% url 'dashboard_product_detail' product.id %}">
+<div class='product_card'>
+    <img src="{{product.thumbnail.url}}" alt="{{product.name}}">
+    <p class='product_card_name'>{{product.name}}</p>
+    <p class='product_card_description'>{{product.description}}</p>
+    <p class='product_card_price'>{{product.price}} SP</p>
+    <p class='product_card_stock'>In Stock: {{product.stock}}</p>
+    <p class='product_card_avg_rating'>Average Rating: {{product.average_rating}}/10</p>
+    <p class='product_card_review_count'>Review Count: {{product.review_count}}</p>
+</div>
+</a>
+{% else %}
+<a href="{% url 'dashboard_product_detail' product.id %}">
+<div class='product_card_deactivated'>
+    <img src="{{product.thumbnail.url}}" alt="{{product.name}}">
+    <p class='product_card_name_deactivated'>{{product.name}}</p>
+    <p class='product_card_description_deactivated'>{{product.description}}</p>
+    <p class='product_card_price_deactivated'>{{product.price}} SP</p>
+    <p class='product_card_stock_deactivated'>In Stock: {{product.stock}}</p>
+    <p class='product_card_avg_rating_deactivated'>Average Rating: {{product.average_rating}}/10</p>
+    <p class='product_card_review_count_deactivated'>Review Count: {{product.review_count}}</p>
+</div>
+</a>
+{% endif %}
+{% endfor %}
+</div>
+
+
+<a href="{% url 'dashboard_product_list' %}?category={{category.id}}">View More</a>
+
+{% endblock content %}

@@ -1,0 +1,13 @@
+{% extends "base.html" %}
+
+{% block title %}Review Edit{% endblock title %}
+
+{% block content %}
+
+<form method='post' class='review_edit_form'>
+    {% csrf_token %}
+    {{form.as_p}}
+    <button type='submit' class='review_edit_button'>Confirm</button>
+</form>
+
+{% endblock content %}

@@ -1,0 +1,39 @@
+{% extends "base.html" %}
+
+
+{% block title %}Addresses{% endblock title %}
+
+{% block content %}
+
+<a class='address_list_add_button' href="{% url 'address_add' %}">Add Address</a>
+
+{% if addresses %}
+{% for address in addresses %}
+<div class='address_list_item'>
+    <span class='address_list_item_governorate'>{{address.governorate}}</span>
+    <span class='address_list_item_city'>{{address.city}}</span>
+    <span class='address_list_item_street'>{{address.street}}</span>
+    <span class='address_list_item_building'>{{address.building}}</span>
+    {% if address.unit %}
+    <span class='address_list_item_unit'>{{address.unit}}</span>
+    {% endif %}
+    {% if address.notes %}
+    <span class='address_list_item_notes'>{{address.notes}}</span>
+    {% endif %}
+    <div class='address_list_item_buttons'>    
+        <a class='address_list_item_edit_button' href="{% url 'address_edit' address.id %}">Edit</a>
+        <form method='post' action="{% url 'address_delete' address.id %}" class="inline-form">
+            {% csrf_token %}
+            <button type='submit' class='address_list_item_delete_button'>Delete</button>
+        </form>
+        {% if not address.is_primary %}
+        <form method='post' action="{% url 'address_make_primary' address.id %}" class="inline-form">
+            {% csrf_token %}
+            <button type='submit' class='address_list_item_make_primary_button'>Make Primary</button>
+        </form>
+        {% endif %}
+    </div>
+</div>
+{% endfor %}
+{% endif %}
+{% endblock content %}

@@ -1,0 +1,13 @@
+{% extends "base-dashboard.html" %}
+
+{% block title %}Category Add{% endblock title %}
+
+{% block content %}
+
+<form method='post' class='category_add_form'>
+    {% csrf_token %}
+    {{form.as_p}}
+    <button type='submit' class='category_add_button'>Add</button>
+</form>
+
+{% endblock content %}

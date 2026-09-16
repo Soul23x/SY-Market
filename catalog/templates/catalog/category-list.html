@@ -1,0 +1,38 @@
+{% extends "base.html" %}
+
+{% block title %}Categories{% endblock title %}
+
+{% block content %}
+
+<form method='get' class='category_search_form'>
+    <input name='search' value="{{request.GET.search}}" placeholder='Search categories...'>
+    <button type='submit' class='search_button'>Search</button>
+</form>
+
+<div class='category_list_grid'>
+{% for category in categories %}
+<a href="{% url 'category_detail' category.id %}" class='category_list_item'>
+<div class='category_card'>
+    <p class='category_list_item_name'>
+        {{category.name}}
+    </p>
+    <p class='category_list_item_description'>
+        {{category.description}}
+    </p>
+</div>
+</a>
+{% endfor %}
+</div>
+
+
+<div class='paging'>
+    {% if categories.has_previous %}
+    <a href="?search={{request.GET.search}}&page={{categories.previous_page_number}}" class='page_button'>{{categories.previous_page_number}}</a>
+    {% endif %}
+    <span class='current_page'>{{categories.number}}</span>
+    {% if categories.has_next %}
+    <a href="?search={{request.GET.search}}&page={{categories.next_page_number}}" class='page_button'>{{categories.next_page_number}}</a>
+    {% endif %}
+</div>
+
+{% endblock content %}

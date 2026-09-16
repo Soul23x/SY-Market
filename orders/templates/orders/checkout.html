@@ -1,0 +1,115 @@
+{% extends "base.html" %}
+
+<!--
+why should I ramove label, I don't even know what it is
+-->
+<!--
+<input type="radio"...>
+<label for="address-{{ address.id }}">...</label>
+what even is that ?
+-->
+
+{% block title %}Checkout{% endblock title %}
+
+{% block content %}
+
+<div class='checkout_cart_items_block'>
+    {% for item in cart_items %}
+    <div class='cart_item'>
+        <img class='cart_item_product_thumbnail' src="{{item.product.thumbnail.url}}" alt="{{item.product.name}}">
+        <p class='cart_item_product_name_and_quantity'>{{item.product.name}} x{{item.quantity}}</p>
+        <div class='cart_item_buttons'>
+
+            {% if item.max_increment > 0 %}
+            <form method='post' action="{% url 'cart_item_increase' item.id %}" class="inline-form">
+                {% csrf_token %}
+                <input type="hidden" name="next" value="{% url 'checkout' %}">
+            <!--<input class='item_quantity_increment_input' type="number" value="1" min='1' max="{{item.max_increment}}" name='quantity'> -->
+                <button class='item_quantity_increment_input_button' type='submit'>+</button>
+            </form>
+            {% endif %}
+
+            {% if item.max_decrement > 0 %}
+            <form method='post' action="{% url 'cart_item_decrease' item.id %}" class="inline-form">
+                {% csrf_token %}
+                <input type="hidden" name="next" value="{% url 'checkout' %}">
+            <!--<input class='item_quantity_decrement_input' type="number" value="1" min='1' max="{{item.max_decrement}}" name='quantity'> -->
+                <button class='item_quantity_decrement_input_button' type='submit'>-</button>
+            </form>
+            {% endif %}
+
+            <form method='post' action="{% url 'cart_item_delete' item.id %}" class="inline-form">
+                {% csrf_token %}
+                <input type="hidden" name="next" value="{% url 'checkout' %}">
+                <button type='submit' class='cart_item_delete_button'>Remove</button>
+            </form>
+        </div>
+    </div>
+    {% endfor %}
+</div>
+
+
+
+<div class='checkout_addresses_block'>
+{% if addresses %}
+
+{% for address in addresses %}
+<label class='address_list_item_label'>
+<input type="radio" name='address_id' value="{{address.id}}" form='place-order-form' {% if address == primary_address %}checked{% endif %} required>
+<div class='address_list_item'>
+    {% if address == primary_address %}
+    <span class='checkout_primary_address_mark'>Primary Address</span>
+    {% endif %}
+    <span class='address_list_item_governorate'>{{address.governorate}}</span>
+    <span class='address_list_item_city'>{{address.city}}</span>
+    <span class='address_list_item_street'>{{address.street}}</span>
+    <span class='address_list_item_building'>{{address.building}}</span>
+    {% if address.unit %}
+    <span class='address_list_item_unit'>{{address.unit}}</span>
+    {% endif %}
+    {% if address.notes %}
+    <span class='address_list_item_notes'>{{address.notes}}</span>
+    {% endif %}
+    <div class='address_list_item_buttons'>
+        <a class='address_list_item_edit_button' href="{% url 'address_edit' address.id %}?next={% url 'checkout' %}">Edit</a>
+        <form method='post' action="{% url 'address_delete' address.id %}" style="display:inline;" class="inline-form">
+            {% csrf_token %}
+            <input type="hidden" name="next" value="{% url 'checkout' %}">
+            <button type='submit' class='address_list_item_delete_button'>Delete</button>
+        </form>
+    </div>
+</div>
+</label>
+{% endfor %}
+{% else %}
+<p class='checkout_no_addresses'>No Address</p>
+{% endif %}
+<a href="{% url 'address_add' %}?next={% url 'checkout' %}" class='checkout_add_address_button'>Add Address</a>
+</div>
+
+
+
+
+<form method='post' action="{% url 'place_order' %}" id='place-order-form'>
+    {% csrf_token %}
+    <button type='submit' class='checkout_place_order_button'>Place Order</button>
+</form>
+
+{% endblock content %}
+
+<!-- choose address button that makes a request.POST.address_id without going to place_order-->
+<!-- becomes unclickable and marked as selected  -->
+<!-- maybe radio buttons of address card divs ? -->
+<!--
+How can the customer choose one of those address cards 
+to put in address_id without going to place_order on address choosing click
+maybe radio selects of address card div ?
+but how does that initiates address_id as a GET parameter to give to place_order
+and how 
+-->
+<!-- 
+I also thought of passing an empty address_id from the view,
+but how can the selected address assign to it ?
+what's even the process of choosing an address card and how does choosing that card
+give the address_id its value ? 
+-->

@@ -1,0 +1,39 @@
+{% extends "base-dashboard.html" %}
+
+{% block title %}Payment Detail{% endblock title %}
+
+{% block content %}
+
+<a href="{% url 'payment_detail' payment.id %}">
+    <h1 class='payment_detail_header'>Payment Detail</h1>
+</a>
+
+<div class='payment_card'>
+    <p class='payment_card_order_number'>Order: {{payment.order.order_number}}</p>
+    <p class='payment_card_amount'>Amount: {{payment.amount}} SP</p>
+    <p class='payment_card_payment_status'>Status: {{payment.payment_status}}</p>
+    <p class='payment_card_updated_at'>Last Update: {{payment.updated_at}}</p>
+    {% if payment.transaction_id %}
+    <!-- transaction_id is blank=true and necessary for a payment to be created in the first place -->
+    <p class='payment_card_transaction_id'>Transaction ID: {{ payment.transaction_id }}</p>
+    {% endif %}
+
+    {% if payment_status_choices %}
+    <form method='post' action="{% url 'payment_status_update' payment.id %}" class='payment_status_update_form'>
+    {% csrf_token %}
+    <select name="status" class='payment_status_update_choices'>
+        {% for status, label in payment_status_choices %}
+            
+            <option value="{{status}}" {% if status == payment.payment_status %}selected{% endif %}>{{label}}</option>
+        {% endfor %}
+    </select>
+    <button type='submit' class='payment_status_confirm_button'>Confirm</button>
+    </form>
+    {% endif %}
+</div>
+
+
+
+
+
+{% endblock content %}

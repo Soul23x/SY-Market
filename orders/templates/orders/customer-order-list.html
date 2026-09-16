@@ -1,0 +1,54 @@
+{% extends "base.html" %}
+
+{% block title %}Orders{% endblock title %}
+
+{% block content %}
+
+<form method='get' class='customer_order_search_form'>
+    <input name='search' value="{{request.GET.search}}" placeholder='Search Orders...'>
+    <button type='submit' class='search_button'>Search</button>
+</form>
+
+
+
+{% for order in orders %}
+<a href="{% url 'customer_order_detail' order.id %}">
+<div class='customer_order_card'>
+    <p class='order_item_number'>Order: {{order.order_number}}</p>
+    <p class='order_item_status'>Status: {{order.order_status}}</p>
+    <p class='order_item_shipment_status'>Shipment Status: {% if order.shipment %}{{order.shipment.shipment_status}}{% else %}Not Made Yet{% endif %}</p>
+    <p class='order_item_payment_status'>Payment Status: {{order.payment.payment_status}}</p>
+    <p class='order_item_total_price'>Total Price: {{order.total_price}}</p>
+    <p class='order_item_customer_phone_number'>Customer Phone Number: {{order.customer_phone_number}}</p>
+    <p class='order_item_shipping_address'>Address: 
+        <span class='order_item_shipping_address_governorate'>{{order.shipping_address.governorate}}, </span>
+        <span class='order_item_shipping_address_city'>{{order.shipping_address.city}}, </span>
+        <span class='order_item_shipping_address_street'>{{order.shipping_address.street}}, </span>
+        <span class='order_item_shipping_address_building'>{{order.shipping_address.building}}</span>
+        {% if order.shipping_address.unit %}
+        <span class='order_item_shipping_address_unit'>{{order.shipping_address.unit}}</span>
+        {% endif %}
+        {% if order.shipping_address.notes %}
+        <span class='order_item_shipping_address_notes'>{{order.shipping_address.notes}}</span>
+        {% endif %}
+    </p>
+    <p class='order_item_created_at'>Created At: {{order.created_at}}</p>
+</div>
+</a>
+{% empty %}
+<p class='orders_empty_list'>No Orders Yet!</p>
+{% endfor %}
+
+
+
+<div class='paging'>
+    {% if orders.has_previous %}
+    <a class='page_button' href="?search={{request.GET.search}}&page={{orders.previous_page_number}}">{{orders.previous_page_number}}</a>
+    {% endif %}
+    <span class='current_page'>{{orders.number}}</span>
+    {% if orders.has_next %}
+    <a class='page_button' href="?search={{request.GET.search}}&page={{orders.next_page_number}}">{{orders.next_page_number}}</a>
+    {% endif %}
+</div>
+
+{% endblock content %}

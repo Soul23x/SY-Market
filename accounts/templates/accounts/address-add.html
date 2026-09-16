@@ -1,0 +1,12 @@
+{% extends "base.html" %}
+
+{% block title %}Adding an Address{% endblock title %}
+
+{% block content %}
+<form method='post' class='address_add_form'>
+    {% csrf_token %}
+    {{form.as_p}}
+    <input type="hidden" name="next" value="{{ next_url }}">
+    <button type='submit' class='address_add_button'>Submit</button>
+</form>
+{% endblock content %}

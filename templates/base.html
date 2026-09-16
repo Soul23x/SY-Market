@@ -1,0 +1,28 @@
+<!DOCTYPE html>
+{% load static %}
+<html lang="en" data-theme="{{ theme|lower }}" data-color="{{ store_color|lower }}" data-font="{{ font|lower }}">
+<head>
+<link rel="stylesheet" href="{% static 'css/style.css' %}">
+<title class='title'> {% block title %} SY-Market {% endblock %}</title>
+</head>
+<body class='base_body'>
+{% include 'navbar.html' %}
+
+{% if messages %}
+    <div class='messages_container'>
+        {% for message in messages %}
+        <div class="alert alert_{{ message.tags }}">
+            {{ message }}
+        </div>
+        {% endfor %}
+    </div>
+{% endif %}
+
+<div class="page_content">
+{% block content %}
+{% endblock %}
+</div>
+
+{% include 'footer.html' %}
+</body>
+</html>

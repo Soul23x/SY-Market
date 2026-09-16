@@ -1,0 +1,59 @@
+{% extends "base.html" %}
+
+{% block title %}Cart{% endblock title %}
+
+{% block content %}
+
+<h1 class='cart_detail_header'>My Cart</h1>
+
+
+<div class='cart_items_block'>
+    {% if cart_items %}
+    {% for item in cart_items %}
+    <div class='cart_item'>
+        <img class='cart_item_product_thumbnail' src="{{item.product.thumbnail.url}}" alt="{{item.product.name}}">
+        <p class='cart_item_product_name_and_quantity'>{{item.product.name}} x{{item.quantity}}</p>
+        <div class='cart_item_buttons'>
+            {% if item.max_increment > 0 %}
+            <form method='post' action="{% url 'cart_item_increase' item.id %}" class="inline-form">
+                {% csrf_token %}
+                {% if item.product.stock %}
+            <!--<input class='item_quantity_increment_input' type="number" min='1' max="{{item.max_increment}}" value="1" name='quantity'> -->
+                <button class='item_quantity_increment_input_button' type='submit'>+</button>
+                {% endif %}
+            </form>
+            {% endif %}
+            {% if item.quantity > 1 and item.max_decrement > 0 %}
+            <form method='post' action="{% url 'cart_item_decrease' item.id %}" class="inline-form">
+                {% csrf_token %}
+                {% if item.product.stock %}
+            <!--<input class='item_quantity_decrement_input' type="number" min='1' max="{{item.max_decrement}}" value="1" name='quantity'> -->
+                <button class='item_quantity_decrement_input_button' type='submit'>-</button>
+                {% endif %}
+            </form>
+            {% endif %}
+            <form method='post' action="{% url 'cart_item_delete' item.id %}" class="inline-form">
+                {% csrf_token %}
+                <button type='submit' class='cart_item_delete_button'>Remove</button>
+            </form>
+        </div>
+    </div>
+    {% endfor %}
+    {% else %}
+    <p class='cart_empty_info'>Cart Empty</p>
+    <a class='cart_empty_browse_products_button' href="{% url 'product_list' %}">Browse Products</a>
+    {% endif %}
+</div>
+
+{% if cart_items %}
+
+<form method='post' action="{% url 'cart_clear' %}">
+    {% csrf_token %}
+    <button type='submit' class='cart_clear_button'>Clear Cart</button>
+</form>
+
+<a href="{% url 'checkout' %}" class='cart_checkout_button'>Checkout</a>
+
+{% endif %}
+
+{% endblock content %}

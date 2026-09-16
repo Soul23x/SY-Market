@@ -1,0 +1,47 @@
+{% extends "base-dashboard.html" %}
+
+
+{% block title %}Shipments{% endblock title %}
+
+{% block content %}
+
+<a href="{% url 'shipment_list' %}">
+    <h1 class='shipment_list_header'>Shipments</h1>
+</a>
+
+
+<form method='get' class='shipment_search_form'>
+    <input name='search' value="{{request.GET.search}}" placeholder='Search Shipments...'>
+    <button type='submit' class='search_button'>Search</button>
+</form>
+
+
+
+{% for shipment in shipments %}
+
+<a href="{% url 'shipment_detail' shipment.id %}">
+    <div class='shipment_card'>
+        <p class='shipment_card_order_number'>Order: {{shipment.order.order_number}}</p>
+        {% if shipment.tracking_number %}
+        <p class='shipment_card_tracking_number'>Tracking Number: {{shipment.tracking_number}}</p>
+        {% endif %}
+        <p class='shipment_card_status'>Status: {{shipment.shipment_status}}</p>
+    </div>
+</a>
+
+{% endfor %}
+
+
+
+<div class='paging'>
+    {% if shipments.has_previous %}
+    <a href="?search={{request.GET.search}}&page={{shipments.previous_page_number}}" class='page_button'>{{shipments.previous_page_number}}</a>
+    {% endif %}
+    <span class='current_page'>{{shipments.number}}</span>
+    {% if shipments.has_next %}
+    <a href="?search={{request.GET.search}}&page={{shipments.next_page_number}}" class='page_button'>{{shipments.next_page_number}}</a>
+    {% endif %}
+</div>
+
+
+{% endblock content %}

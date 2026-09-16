@@ -1,0 +1,43 @@
+{% extends "base-dashboard.html" %}
+
+{% block title %}Category List{% endblock title %}
+
+{% block content %}
+
+<form method='get' class='category_search_form'>
+    <input name='search' value="{{request.GET.search}}" placeholder='Search Categories...'>
+    <button type='submit' class='search_button'>Search</button>
+</form>
+
+<a class='category_add_button' href="{% url 'category_add' %}">Add Category</a>
+
+<div class="dashboard_category_grid">
+{% for category in categories %}
+<a href="{% url 'dashboard_category_detail' category.id %}">
+    {% if category.is_active %}
+    <div class='dashboard_category_card'>
+        <p class='dashboard_category_card_name'>{{category.name}}</p>
+        <p class='dashboard_category_card_description'>{{category.description}}</p>
+    </div>
+    {% else %}
+    <div class='dashboard_category_card_deactivated'>
+        <p class='dashboard_category_card_name_deactivated'>{{category.name}}</p>
+        <p class='dashboard_category_card_description_deactivated'>{{category.description}}</p>
+    </div>
+    {% endif %}
+</a>
+{% endfor %}
+</div>
+
+
+<div class='paging'>
+    {% if categories.has_previous %}
+    <a class='page_button' href="?search={{request.GET.search}}&page={{categories.previous_page_number}}">{{categories.previous_page_number}}</a>
+    {% endif %}
+    <span class='current_page'>{{categories.number}}</span>
+    {% if categories.has_next %}
+    <a class='page_button' href="?search={{request.GET.search}}&page={{categories.next_page_number}}">{{categories.next_page_number}}</a>
+    {% endif %}
+</div>
+
+{% endblock content %}

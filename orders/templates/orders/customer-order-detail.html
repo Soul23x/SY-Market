@@ -1,0 +1,60 @@
+{% extends "base.html" %}
+
+{% block title %}Order Detail{% endblock title %}
+
+{% block content %}
+
+
+<div class='customer_order_card'>
+
+    <h3 class='customer_order_block_header'>Order</h3>
+
+    <p class='order_item_number'>Order: {{order.order_number}}</p>
+    <p class='order_item_status'>Status: {{order.order_status}}</p>
+    <p class='order_item_shipment_status'>Shipment Status: {% if order.shipment %}{{order.shipment.shipment_status}}{% else %}Not Made Yet{% endif %}</p>
+    <p class='order_item_payment_status'>Payment Status: {{order.payment.payment_status}}</p>
+    <p class='order_item_total_price'>Total Price: {{order.total_price}} SP</p>
+    <p class='order_item_customer_phone_number'>Contact Phone Number: {{order.customer_phone_number}}</p>
+    <p class='order_item_shipping_address'>Address: 
+        <span class='order_item_shipping_address_governorate'>{{order.shipping_address.governorate}}, </span>
+        <span class='order_item_shipping_address_city'>{{order.shipping_address.city}}, </span>
+        <span class='order_item_shipping_address_street'>{{order.shipping_address.street}}, </span>
+        <span class='order_item_shipping_address_building'>{{order.shipping_address.building}}</span>
+        {% if order.shipping_address.unit %}
+        <span class='order_item_shipping_address_unit'>{{order.shipping_address.unit}}</span>
+        {% endif %}
+        {% if order.shipping_address.notes %}
+        <span class='order_item_shipping_address_notes'>{{order.shipping_address.notes}}</span>
+        {% endif %}
+    </p>
+    <p class='order_item_created_at'>Created At: {{order.created_at}}</p>
+</div>
+
+{% if order.is_pending and order.payment.payment_status == 'PENDING' %}
+<form method='post' action="{% url 'customer_order_cancel' order.id %}">
+    {% csrf_token %}
+    <button type='submit' class='order_cancel_button'>Cancel Order</button>
+</form>
+{% endif %}
+
+
+<div class='customer_order_items_block'>
+    <h3 class='customer_order_items_block_header'>Order Items</h3>
+
+    {% for item in order.order_items.all %}
+        <div class='customer_order_item_card'>
+            <div class='customer_order_item_product'>
+                <img src="{{item.product.thumbnail.url}}" alt="{{item.product_name}}">
+                <p class='customer_order_item_product_name_quantity'>Product: {{item.product_name}} x{{item.quantity}}</p>
+                <p class='customer_order_item_unit_price_and_subtotal'>
+                    <span class='customer_order_item_unit_price'>Unit Price: {{item.unit_price}} SP</span>
+                    <span class='customer_order_item_subtotal'>Price Subtotal: {{item.subtotal}}</span>
+                </p>
+            </div>
+        </div>
+    {% endfor %}
+    
+</div>
+
+
+{% endblock content %}

@@ -1,0 +1,68 @@
+{% extends "base-dashboard.html" %}
+
+{% block title %}Order Detail{% endblock title %}
+
+{% block content %}
+
+<h1 class='dashboard_order_detail_header'>Order Detail</h1>
+
+
+<div class='dashboard_order_card'>
+    <p class='order_item_number'>Order: {{order.order_number}}</p>
+    <p class='order_item_status'>Status: {{order.order_status}}</p>
+    <p class='order_item_shipment_status'>Shipment Status: {% if order.shipment %}{{order.shipment.shipment_status}}{% else %} Not Yet Shipped! {% endif %}</p>
+    <p class='order_item_payment_status'>Payment Status: {{order.payment.payment_status}}</p>
+    <p class='order_item_total_price'>Total Price: {{order.total_price}} SP</p>
+    <p class='order_item_customer'>Customer: {{order.customer.user.first_name}} {{order.customer.user.last_name}}</p>
+    <p class='order_item_customer_phone_number'>Customer Phone Number: {{order.customer_phone_number}}</p>
+    <p class='order_item_shipping_address'>Address: 
+        <span class='order_item_shipping_address_governorate'>{{order.shipping_address.governorate}}, </span>
+        <span class='order_item_shipping_address_city'>{{order.shipping_address.city}}, </span>
+        <span class='order_item_shipping_address_street'>{{order.shipping_address.street}}, </span>
+        <span class='order_item_shipping_address_building'>{{order.shipping_address.building}}</span>
+        {% if order.shipping_address.unit %}
+        <span class='order_item_shipping_address_unit'>{{order.shipping_address.unit}}</span>
+        {% endif %}
+        {% if order.shipping_address.notes %}
+        <span class='order_item_shipping_address_notes'>{{order.shipping_address.notes}}</span>
+        {% endif %}
+    </p>
+    <p class='order_item_created_at'>Created At: {{order.created_at}}</p>
+</div>
+
+{% if order_status_choices %}
+<form method='post' action="{% url 'order_status_update' order.id %}" class='order_status_update_form'>
+    {% csrf_token %}
+    <select name="status" class='order_status_update_select'>
+        {% for status,label in order_status_choices %}
+        <option value="{{status}}" class='order_status_update_option' selected>{{label}}</option>
+        {% endfor %}
+    </select>
+    <button type='submit' class='update_order_status_button'>Update Status</button>
+</form>
+{% endif %}
+
+
+
+<div class='dashboard_order_items_block'>
+    <h3 class='dashboard_order_items_block_header'>Order Items</h3>
+
+    {% for item in order.order_items.all %}
+    <a href="{% url 'dashboard_product_detail' item.product.id %}">
+        <div class='dashboard_order_item_card'>
+            <div class='dashboard_order_item_product'>
+                <img src="{{item.product.thumbnail.url}}" alt="{{item.product_name}}">
+                <p class='dashboard_order_item_product_name_quantity'>Product: {{item.product_name}} x{{item.quantity}}</p>
+                <p class='dashboard_order_item_unit_price_and_subtotal'>
+                    <span class='dashboard_order_item_unit_price'>Unit Price: {{item.unit_price}} SP</span>
+                    <span class='dashboard_order_item_subtotal'>Price Subtotal: {{item.subtotal}}</span>
+                </p>
+            </div>
+        </div>
+    </a>
+    {% endfor %}
+    
+</div>
+
+
+{% endblock content %}

@@ -1,0 +1,48 @@
+{% extends "base.html" %}
+
+{% block title %}Products{% endblock title %}
+
+{% block content %}
+
+<a href="{% url 'product_list' %}">
+<h1 class='product_list_header'>Products</h1>
+</a>
+
+<form method='get' class='product_search_form'>
+    {% if request.GET.category %}
+    <input type="hidden" name='category' value="{{request.GET.category}}">
+    <input name='search' value="{{request.GET.search}}" placeholder='Search Products In Category...'>
+    {% else %}
+    <input name='search' value="{{request.GET.search}}" placeholder='Search Products...'>
+    {% endif %}
+    <button type='submit' class='search_button'>Search</button>
+</form>
+
+
+<div class="product_list_grid">
+{% for product in products %}
+<a href="{% url 'product_detail' product.id %}">
+<div class='product_card'>
+    <img src="{{product.thumbnail.url}}" alt="{{product.name}}">
+    <p class='product_card_name'>{{product.name}}</p>
+    <p class='product_card_description'>{{product.description}}</p>
+    <p class='product_card_price'>{{product.price}} SP</p>
+    <p class='product_card_category'>{{product.category}}</p>
+    <p class='product_card_avg_rating'>Average Rating: {{product.average_rating}}/10</p>
+</div>
+</a>
+{% endfor %}
+</div>
+
+
+<div class='paging'>
+    {% if products.has_previous %}
+    <a class='page_button' href="?search={{request.GET.search}}&page={{products.previous_page_number}}&category={{request.GET.category}}">{{products.previous_page_number}}</a>
+    {% endif %}
+    <span class='current_page'>{{products.number}}</span>
+    {% if products.has_next %}
+    <a class='page_button' href="?search={{request.GET.search}}&page={{products.next_page_number}}&category={{request.GET.category}}">{{products.next_page_number}}</a>
+    {% endif %}
+</div>
+
+{% endblock content %}

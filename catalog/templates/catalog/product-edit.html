@@ -1,0 +1,13 @@
+{% extends "base-dashboard.html" %}
+
+{% block title %}Product Edit{% endblock title %}
+
+{% block content %}
+
+<form method='post' enctype="multipart/form-data" class='product_edit_form'>
+    {% csrf_token %}
+    {{form.as_p}}
+    <button type='submit' class='product_edit_button'>Edit</button>
+</form>
+
+{% endblock content %}

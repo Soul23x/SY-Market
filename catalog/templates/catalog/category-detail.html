@@ -1,0 +1,29 @@
+{% extends "base.html" %}
+
+{% block title %}Category Detail{% endblock title %}
+
+{% block content %}
+
+<h1 class='category_detail_header'>Category Detail</h1>
+
+<p class='category_detail_name'>{{category.name}}</p>
+<p class='category_detail_description'>{{category.description}}</p>
+
+<div class='category_products_grid'>
+{% for product in latest_products %}
+<a href="{% url 'product_detail' product.id %}">
+<div class='product_card'>
+    <img src="{{product.thumbnail.url}}" alt="{{product.name}}">
+    <p class='product_card_name'>{{product.name}}</p>
+    <p class='product_card_description'>{{product.description}}</p>
+    <p class='product_card_price'>{{product.price}} SP</p>
+    <p class='product_card_average_rating'>Average Rating: {{product.average_rating}}/10</p>
+</div>
+</a>
+{% endfor %}
+</div>
+
+
+<a href="{% url 'product_list' %}?category={{category.id}}" class='category_detail_view_more_products_button'>View More</a>
+
+{% endblock content %}

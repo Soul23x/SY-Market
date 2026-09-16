@@ -1,0 +1,28 @@
+{% extends "base-dashboard.html" %}
+
+
+{% block title %}Store Settings{% endblock title %}
+
+{% block content %}
+
+<h1 class='store_settings_header'>Store Settings</h1>
+
+
+<form method='post' class='store_settings_form'>
+    {% csrf_token %}
+    {{form.as_p}}
+    <button type='submit' class='store_settings_confirm_button'>Confirm</button>
+</form>
+
+
+<form method='post' action="{% url 'store_settings_toggle_active' %}" class='store_settings_toggle_active_form'>
+    {% csrf_token %}
+    {% if form.instance and form.instance.is_active %}
+    <button type='submit' class='store_settings_deactivate_button'>Deactivate Store</button>
+    {% else %}
+    <button type='submit' class='store_settings_activate_button'>Activate Store</button>
+    {% endif %}
+</form>
+
+
+{% endblock content %}

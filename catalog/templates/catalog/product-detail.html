@@ -1,0 +1,80 @@
+{% extends "base.html" %}
+
+{% block title %}Product Detail{% endblock title %}
+
+{% block content %}
+
+<div class='product_card product_card_detail'>
+    <img src="{{product.thumbnail.url}}" alt="{{product.name}}">
+    <p class='product_card_name'>{{product.name}}</p>
+    <p class='product_card_description'>{{product.description}}</p>
+    <p class='product_card_price'>{{product.price}} SP</p>
+    <p class='product_card_category'>{{product.category}}</p>
+</div>
+
+
+<div class='product_stock'>
+    {% if product.stock > 0 %}
+    <p class='product_stock'>In Stock: {{product.stock}}</p>
+    {% if not user.is_authenticated %}
+    <a class='product_anonymous_add_to_cart_button' href="{% url 'login' %}">Add To Cart</a>
+    {% else %}
+    <form method='post' action="{% url 'cart_item_add' product.id %}">
+        {% csrf_token %}
+        <input type="number" name='quantity' value='1' min='1' max='{{product.stock}}'>
+        <button class='product_add_to_cart_button' type='submit'>Add To Cart</button>
+    </form>
+    {% endif %}
+    {% else %}
+    <p class='product_stock'>Out Of Stock</p>
+    {% endif %}
+</div>
+
+
+<div class='product_images_grid'>
+    {% for productimage in product.product_images.all %}
+    <img src="{{productimage.image.url}}" alt="{{product.name}}">
+    {% endfor %}
+</div>
+
+{% if customer_review %}
+<div class='product_customer_review'>
+    <p class='product_customer_review_rating'>{{customer_review.rating}}</p>
+    <p class='product_customer_review_comment'>{{customer_review.comment}}</p>
+    <form method='post' action="{% url 'review_delete' product.id customer_review.id %}" class='inline-form'>
+        {% csrf_token %}
+        <button type='submit' class='review_delete_button'>Delete</button>
+    </form>
+
+    <a class='review_edit_button' href="{% url 'review_edit' product.id customer_review.id %}">Edit</a>
+
+</div>
+{% else %}
+{% if customer_can_review %}
+<a href="{% url 'review_add' product.id %}">Add Review</a>
+{% endif %}
+{% endif %}
+
+<div class='product_reviews_block'>
+    {% for review in reviews %} 
+    <div class='product_review_card'>
+        <p class='product_review_card_rating'>{{review.rating}}/10</p>
+        <p class='product_review_card_user'>{{review.customer.user.first_name}} {{review.customer.user.last_name}}</p>
+        <p class='product_review_card_comment'>{{review.comment}}</p>
+        <p class='product_review_card_created_at'>{{review.created_at}}</p>
+    </div>
+    {% endfor %}
+</div>
+
+
+<div class='review_paging'>
+    {% if reviews.has_previous %}
+    <a class='reviews_previous_page_button' href="?review_page={{reviews.previous_page_number}}">{{reviews.previous_page_number}}</a>
+    {% endif %}
+    <span class='reviews_current_page'>{{reviews.number}}</span>
+    {% if reviews.has_next %}
+    <a class='reviews_next_page_button' href="?review_page={{reviews.next_page_number}}">{{reviews.next_page_number}}</a>
+    {% endif %}
+</div>
+
+{% endblock content %}

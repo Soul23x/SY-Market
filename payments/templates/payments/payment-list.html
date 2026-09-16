@@ -1,0 +1,42 @@
+{% extends "base-dashboard.html" %}
+
+
+{% block title %}Payments{% endblock title %}
+
+{% block content %}
+
+<a href="{% url 'payment_list' %}">
+    <h1 class='payment_list_header'>Payments</h1>
+</a>
+
+<form method='get' class='payment_search_form'>
+    <input name='search' value="{{request.GET.search}}" placeholder='Search Payments...'>
+    <button type='submit' class='search_button'>Search</button>
+</form>
+
+
+{% for payment in payments %}
+
+<a href="{% url 'payment_detail' payment.id %}">
+    <div class='payment_card'>
+        <p class='payment_card_order_number'>Order: {{payment.order.order_number}}</p>
+        <p class='payment_card_amount'>Amount: {{payment.amount}} SP</p>
+        <p class='payment_card_payment_status'>Status: {{payment.payment_status}}</p>
+        <p class='payment_card_updated_at'>Last Update: {{payment.updated_at}}</p>
+    </div>
+</a>
+{% endfor %}
+
+
+<div class='paging'>
+    {% if payments.has_previous %}
+    <a href="?search={{request.GET.search}}&page={{payments.previous_page_number}}" class='page_button'>{{payments.previous_page_number}}</a>
+    {% endif %}
+    <span class='current_page'>{{payments.number}}</span>
+    {% if payments.has_next %}
+    <a href="?search={{request.GET.search}}&page={{payments.next_page_number}}" class='page_button'>{{payments.next_page_number}}</a>
+    {% endif %}
+</div>
+
+
+{% endblock content %}

@@ -1,0 +1,13 @@
+{% extends "base-dashboard.html" %}
+
+{% block title %}Category Edit{% endblock title %}
+
+{% block content %}
+
+<form method='post' class='category_edit_form'>
+    {% csrf_token %}
+    {{form.as_p}}
+    <button type='submit' class='category_edit_confirm_button'>Confirm</button>
+</form>
+
+{% endblock content %}

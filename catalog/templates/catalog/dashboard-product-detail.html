@@ -1,0 +1,80 @@
+{% extends "base-dashboard.html" %}
+
+{% block title %}Dashboard Product Detail{% endblock title %}
+
+{% block content %}
+
+
+<div class='dashboard_product_card product_card_detail'>
+    <img src="{{product.thumbnail.url}}" alt="{{product.name}}">
+    <p class='dashboard_product_card_name'>{{product.name}}</p>
+    <p class='dashboard_product_card_description'>{{product.description}}</p>
+    <p class='dashboard_product_card_price'>{{product.price}} SP</p>
+    <p class='dashboard_product_card_category'>{{product.category}}</p>
+    <p class='dashboard_product_card_stock'>In Stock: {{product.stock}}</p>
+    {% if product.is_active %}
+    <p class='dashboard_product_card_is_active'>Active</p>
+    {% else %}
+    <p class='dashboard_product_card_is_active'>Deactivated</p>
+    {% endif %}
+    <p class='dashboard_product_card_created_at'>Created At: {{product.created_at}}</p>
+    <p class='dashboard_product_card_avg_rating'>Average Rating: {{product.average_rating}}/10</p>
+    <p class='dashboard_product_card_review_count'>Reviews: {{product.review_count}}</p>
+</div>
+
+<div class='dashboard_product_images'>
+    {% for productimage in product.product_images.all %}
+    <div class='dashboard_product_image'>
+    <img src="{{productimage.image.url}}" alt="{{product.name}}">
+    <form method='post' action="{% url 'product_image_delete' product.id productimage.id %}">
+        {% csrf_token %}
+        <button type='submit' class='dashboard_product_image_delete'>Delete Image</button>
+    </form>
+    </div>
+    {% endfor %}
+    <a href="{% url 'product_image_add' product.id %}">Add Image</a>
+</div>
+
+
+<div class='dashboard_product_detail_buttons'>
+    <a href="{% url 'product_edit' product.id %}" class='product_edit_button'>Edit</a>
+    <form method='post' action="{% url 'product_delete' product.id %}" class='inline-form'>
+        {% csrf_token %}
+        <button type='submit' class='product_delete_button'>Delete</button>
+    </form>
+    <form method='post' action="{% url 'product_toggle_active' product.id %}" class='inline-form'>
+        {% csrf_token %}
+        {% if product.is_active %}
+        <button type='submit' class='product_toggle_active_button'>Deactivate</button>
+        {% else %}
+        <button type='submit' class='product_toggle_active_button'>Activate</button>
+        {% endif %}
+    </form>
+</div>
+
+
+
+<div class='dashboard_product_reviews_block'>
+    {% for review in reviews %} 
+    <div class='dashboard_product_review_card'>
+        <p class='dashboard_product_review_card_rating'>{{review.rating}}/10</p>
+        <p class='dashboard_product_review_card_user'>{{review.customer.user.first_name}} {{review.customer.user.last_name}}</p>
+        <p class='dashboard_product_review_card_comment'>{{review.comment}}</p>
+        <p class='dashboard_product_review_card_created_at'>{{review.created_at}}</p>
+    </div>
+    {% endfor %}
+</div>
+
+
+<div class='review_paging'>
+    {% if reviews.has_previous %}
+    <a class='reviews_previous_page_button' href="?review_page={{reviews.previous_page_number}}">{{reviews.previous_page_number}}</a>
+    {% endif %}
+    <span class='reviews_current_page'>{{reviews.number}}</span>
+    {% if reviews.has_next %}
+    <a class='reviews_next_page_button' href="?review_page={{reviews.next_page_number}}">{{reviews.next_page_number}}</a>
+    {% endif %}
+</div>
+
+
+{% endblock content %}

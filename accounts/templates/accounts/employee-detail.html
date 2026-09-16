@@ -1,0 +1,42 @@
+{% extends "base-dashboard.html" %}
+
+{% block title %}Employee{% endblock title %}
+
+{% block content %}
+
+<div class='employee_detail'>
+    <p class='employee_name'>
+        <span class='employee_first_name'>First Name: {{employee.user.first_name}}</span>
+        <span class='employee_last_name'>Last Name: {{employee.user.last_name}}</span>
+    </p>
+    <p class='employee_contact_info'>
+        <span class='employee_email'>Email: {{employee.user.email}}</span>
+        <span class='employee_phone_number'>Phone Number: {{employee.user.phone_number}}</span>
+    </p>
+    <p class='employee_permissions'>
+        {% for permission in employee.permissions.all %}
+        <span class='employee_permission_item'>Permissions: {{permission}}</span> <!-- just permission ? -->
+        {% endfor %}
+    </p>
+    <div class='employee_detail_buttons'>
+
+        <a href="{% url 'employee_edit' employee.id %}" class='employee_edit_button'>Edit</a>
+
+        <form method='POST' action="{% url 'employee_delete' employee.id %}" class="inline-form">
+            {% csrf_token %}
+            <button type='submit' class='employee_delete_button'>Delete</button>
+        </form>
+
+        <form method='POST' action="{% url 'employee_toggle_active' employee.id %}" class="inline-form">
+            {% csrf_token %}
+            {% if employee.is_active %}
+            <button type='submit' class='employee_toggle_active_button'>Deactivate</button>
+            {% else %}
+            <button type='submit' class='employee_toggle_active_button'>Activate</button>
+            {% endif %}
+        </form>
+        
+    </div>
+</div>
+
+{% endblock content %}
