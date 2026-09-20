@@ -32,6 +32,7 @@ DEBUG = os.getenv('DEBUG', 'False') == 'True'
 
 ALLOWED_HOSTS = []
 
+PLATFORM_DOMAIN = os.getenv('PLATFORM_DOMAIN', 'localhost')
 
 ######### I added this
 
@@ -70,6 +71,7 @@ MIDDLEWARE = [
     'django.contrib.auth.middleware.AuthenticationMiddleware',
     'django.contrib.messages.middleware.MessageMiddleware',
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
+    'store.middleware.store_middleware',
 ]
 
 ROOT_URLCONF = 'config.urls'
