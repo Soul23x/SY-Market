@@ -38,28 +38,26 @@ class Customer(models.Model):
 
 class Employee(models.Model):
 
-    user = models.OneToOneField(User,on_delete=models.CASCADE,related_name='employee')
+    user = models.ForeignKey(User,on_delete=models.CASCADE,related_name='employments')
 
-    #change later if store owner can own multiple stores
-    #store = models.ForeignKey('store.Store',on_delete=models.CASCADE,related_name='employees')
+    store = models.ForeignKey('store.Store',on_delete=models.CASCADE,related_name='employees')
 
     permissions = models.ManyToManyField("Permission",related_name='employees')
 
-    assigned_by = models.ForeignKey(StoreOwner,on_delete=models.PROTECT,related_name='employees')
+    assigned_by = models.ForeignKey(StoreOwner,on_delete=models.SET_NULL,related_name='employees')
 
     joined_at = models.DateTimeField(auto_now_add=True)
 
     is_active = models.BooleanField(default=True)   # separate from User
 
-    @property
-    def store(self):
-        return self.assigned_by.store
-
     def has_permission(self, permission_type):
         return self.permissions.filter(permission_type=permission_type).exists()
 
     def __str__(self):
-            return f'{self.user.username} (Employee)'
+            return f'{self.user.username} (Employee in store "{self.store.name}")'
+
+    class Meta:
+            constraints = [UniqueConstraint(fields=['user','store'],name='unique_employee_user_per_store')]
 
     
 
