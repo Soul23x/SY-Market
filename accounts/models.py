@@ -44,7 +44,7 @@ class Employee(models.Model):
 
     permissions = models.ManyToManyField("Permission",related_name='employees')
 
-    assigned_by = models.ForeignKey(StoreOwner,on_delete=models.SET_NULL,related_name='employees')
+    assigned_by = models.ForeignKey(User,on_delete=models.SET_NULL,related_name='employees',null=True)
 
     joined_at = models.DateTimeField(auto_now_add=True)
 
