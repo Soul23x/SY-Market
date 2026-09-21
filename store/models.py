@@ -1,12 +1,27 @@
 from django.db import models
+from django.core.validators import RegexValidator
+from django.core.exceptions import ValidationError
 
+
+RESERVED_SUBDOMAINS = ['www', 'admin', 'api', 'app', 'static', 'media']
+
+def reserved_subdomain_validator(value):
+    if value in RESERVED_SUBDOMAINS:
+        raise ValidationError('This subdomain is reserved.')
+
+subdomain_format_validator = RegexValidator(
+    regex=r'^[a-z0-9]([a-z0-9-]*[a-z0-9])?$',
+    message='Use lowercase letters, digits and hyphens only.',
+)
+
+#use a model form
 class Store(models.Model):
 
     owner = models.OneToOneField('accounts.StoreOwner',on_delete=models.PROTECT,related_name='store')
 
     name = models.CharField(max_length=30)
 
-    subdomain = models.CharField(max_length=50,unique=True)
+    subdomain = models.CharField(max_length=50,unique=True,validators=[reserved_subdomain_validator,subdomain_format_validator])
 
     created_at = models.DateTimeField(auto_now_add=True)
 
