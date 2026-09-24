@@ -36,7 +36,7 @@ def login_view(request):
         if form.is_valid():
             login(request,form.get_user())
             messages.success(request,'Login Successful')
-            if hasattr(request.user,'store_owner') or hasattr(request.user,'employee'):
+            if (hasattr(request.user,'store_owner') and request.user.store_owner.store == request.store) or Employee.objects.filter(user=request.user,store=request.store,active=True).exists():
                 return redirect('dashboard_home')
             return redirect('home')
     else :
