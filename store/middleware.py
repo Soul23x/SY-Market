@@ -12,10 +12,11 @@ def store_middleware(get_response):
 
         if host.endswith(suffix):
             subdomain = host[:-len(suffix)]
-            try:
-                request.store = Store.objects.filter(subdomain=subdomain)
-            except:
-                raise Http404('Store Not Found')
+            if subdomain != 'www':
+                try:
+                    request.store = Store.objects.get(subdomain=subdomain)
+                except Store.DoesNotExist:
+                    raise Http404('Store Not Found')
 
         return get_response(request)
     return middleware
