@@ -39,6 +39,10 @@ class EmployeeAddForm(forms.ModelForm):
 
     email = forms.EmailField()
 
+    def __init__(self,*args,store=None,**kwargs):
+        self.store = store
+        super().__init__(*args,**kwargs)
+
     class Meta:
         model = Employee
         fields = ['permissions']
@@ -50,6 +54,8 @@ class EmployeeAddForm(forms.ModelForm):
             raise forms.ValidationError('No User Found With This Email')
         if hasattr(User.objects.filter(email=email).first(),'store_owner'): # new
             raise forms.ValidationError('Invalid Email')
+        if Employee.objects.filter(user__email=email,store=self.store).exists():
+            raise forms.ValidationError('Employee Already Assigned')
         return email
 
 
