@@ -201,9 +201,9 @@ def employee_list(request):
     page = request.GET.get('page')
 
     if search_query:
-        employees = Employee.objects.filter(Q(user__username__icontains=search_query) | Q(user__first_name__icontains=search_query) | Q(user__last_name__icontains=search_query),assigned_by=request.user.store_owner)
+        employees = Employee.objects.filter(Q(user__username__icontains=search_query) | Q(user__first_name__icontains=search_query) | Q(user__last_name__icontains=search_query),store=request.store)
     else:
-        employees = Employee.objects.filter(assigned_by=request.user.store_owner)
+        employees = Employee.objects.filter(store=request.store)
 
     paginator = Paginator(employees,24)
     page_obj = paginator.get_page(page)
@@ -216,7 +216,7 @@ def employee_list(request):
 @owner_required
 def employee_detail(request,employee_id):
 
-    employee = get_object_or_404(Employee,id=employee_id,assigned_by=request.user.store_owner)
+    employee = get_object_or_404(Employee,id=employee_id,store=request.store)
 
     return render(request,'accounts/employee-detail.html',{'employee':employee})
 
@@ -230,10 +230,11 @@ def employee_detail(request,employee_id):
 def employee_add(request):
 
     if request.method=='POST':
-        form = EmployeeAddForm(request.POST)
+        form = EmployeeAddForm(request.POST,store=request.store)
         if form.is_valid():
             employee = form.save(commit=False)
-            employee.assigned_by = request.user.store_owner
+            employee.assigned_by = request.user
+            employee.store = request.store
 
             # email validated on is_valid() using our custom clean_email() in the form
             email = form.cleaned_data['email']
@@ -244,7 +245,7 @@ def employee_add(request):
             messages.success(request,'Employee Added Successfully')
             return redirect('employee_list')
     else :
-        form = EmployeeAddForm()
+        form = EmployeeAddForm(store=request.store)
     return render(request,'accounts/employee-add.html',{'form':form})
 
 
@@ -254,7 +255,7 @@ def employee_add(request):
 def employee_edit(request,employee_id):
 
 
-    employee = get_object_or_404(Employee,id=employee_id,assigned_by=request.user.store_owner)
+    employee = get_object_or_404(Employee,id=employee_id,store=request.store)
 
     if request.method=='POST':
         form = EmployeeEditForm(request.POST,instance=employee)
@@ -274,7 +275,7 @@ def employee_edit(request,employee_id):
 @require_POST
 def employee_delete(request,employee_id):
 
-    employee = get_object_or_404(Employee,id=employee_id,assigned_by=request.user.store_owner)
+    employee = get_object_or_404(Employee,id=employee_id,store=request.store)
     employee.delete()
     messages.success(request,'Employee Deleted Successfully')
     return redirect('employee_list')
@@ -285,7 +286,7 @@ def employee_delete(request,employee_id):
 @owner_required
 @require_POST
 def employee_toggle_active(request,employee_id):
-    employee = get_object_or_404(Employee,id=employee_id,assigned_by=request.user.store_owner)
+    employee = get_object_or_404(Employee,id=employee_id,store=request.store)
     employee.is_active = not employee.is_active
     employee.save()
     messages.success(request,'Employee Active Status Changed')
