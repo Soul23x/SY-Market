@@ -8,12 +8,16 @@ from orders.models import Order,OrderStatus
 from shipping.models import Shipment,ShipmentStatus
 from payments.models import Payment,PaymentStatus
 from store.models import Store
+from accounts.models import Employee
 
 
 
-def has_permission(user,permission):
-    is_permitted_employee = (hasattr(user,'employee') and user.employee.has_permission(permission))
-    is_owner = hasattr(user,'store_owner')
+def has_permission(user,permission,store):
+    if store is None:
+        return False
+    employee = Employee.objects.filter(user=user,store=store,is_active=True).first()
+    is_permitted_employee = employee is not None and employee.has_permission(permission)
+    is_owner = (store.owner.user == user)
     return is_owner or is_permitted_employee
 
 
