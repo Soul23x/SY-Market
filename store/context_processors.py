@@ -1,9 +1,14 @@
 from .models import StoreConfig,Store
 
 def store_config(request):
-    store_config = StoreConfig.objects.filter(store=Store.objects.first()).first()
-    if not store_config:
+
+    if request.store is None:
         return {}
+    try:
+        store_config = request.store.config
+    except StoreConfig.DoesNotExist:
+        return {}
+    
     return {
         'store_color': store_config.color_pattern,
         'theme':store_config.theme,
@@ -14,8 +19,9 @@ def store_config(request):
 
 
 def store_footer(request):
-    store = Store.objects.first()
-    if not store:
+
+    store = request.store
+    if store is None:
         return {}
     return {
         'store_contact_phone':store.contact_phone,
