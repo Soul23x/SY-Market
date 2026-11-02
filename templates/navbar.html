@@ -11,7 +11,7 @@
 
 <ul class='navbar'>
 
-    {% if user.employee or user.store_owner %}
+    {% if is_store_owner or is_store_employee %}
     <li class='navbar_item'><a href="{% url 'dashboard_home' %}">Dashboard</a></li>
     {% endif %}
 

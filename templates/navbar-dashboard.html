@@ -18,7 +18,7 @@
     <li class='navbar_item'><a href="{% url 'store_customization' %}">Store Customization</a></li>
     {% endif %}
 
-    {% if user.store_owner %}
+    {% if is_store_owner %}
     <li class='navbar_item'><a href="{% url 'store_settings' %}">Store Settings</a></li>
     <li class='navbar_item'><a href="{% url 'employee_list' %}">Employees</a></li>
     {% endif %}
