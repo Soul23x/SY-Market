@@ -2,13 +2,11 @@ from django.shortcuts import render
 from accounts.decorators import require_employee
 from django.contrib.auth.decorators import login_required
 from django.db.models import Q
-from accounts.models import PermissionType
+from accounts.models import PermissionType, Employee
 from catalog.models import Product,Category
 from orders.models import Order,OrderStatus
 from shipping.models import Shipment,ShipmentStatus
 from payments.models import Payment,PaymentStatus
-from store.models import Store
-from accounts.models import Employee
 
 
 
@@ -28,28 +26,28 @@ def dashboard_home(request):
 
     context = {}
     permissions = []
-    store=Store.objects.first()
+    store=request.store
 
     context['banner']=store.config.banner
 
-    if has_permission(request.user,PermissionType.MANAGE_PRODUCTS):
+    if has_permission(request.user,PermissionType.MANAGE_PRODUCTS,store):
         permissions.append(PermissionType.MANAGE_PRODUCTS)
         recently_added_products = Product.objects.filter(category__store=store).order_by('-created_at')[:10]
         recently_added_categories = Category.objects.filter(store=store).order_by('-created_at')[:10]
         context['recently_added_categories'] = recently_added_categories
         context['recently_added_products']=recently_added_products
 
-    if has_permission(request.user,PermissionType.MANAGE_ORDERS):
+    if has_permission(request.user,PermissionType.MANAGE_ORDERS,store):
         permissions.append(PermissionType.MANAGE_ORDERS)
         active_orders = Order.objects.filter(Q(order_status=OrderStatus.PENDING) | Q(order_status=OrderStatus.PROCESSING) | Q(order_status=OrderStatus.SHIPPED),store=store)
         context['active_orders'] = active_orders
 
-    if has_permission(request.user,PermissionType.MANAGE_SHIPMENTS):
+    if has_permission(request.user,PermissionType.MANAGE_SHIPMENTS,store):
         permissions.append(PermissionType.MANAGE_SHIPMENTS)
         active_shipments = Shipment.objects.filter(Q(shipment_status=ShipmentStatus.PENDING) | Q(shipment_status=ShipmentStatus.PREPARING) | Q(shipment_status=ShipmentStatus.SHIPPED),order__store=store)
         context['active_shipments'] = active_shipments
 
-    if has_permission(request.user,PermissionType.MANAGE_PAYMENTS):
+    if has_permission(request.user,PermissionType.MANAGE_PAYMENTS,store):
         permissions.append(PermissionType.MANAGE_PAYMENTS)
         pending_payments = Payment.objects.filter(payment_status=PaymentStatus.PENDING,order__store=store)
         context['pending_payments'] = pending_payments
