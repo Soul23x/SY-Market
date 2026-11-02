@@ -1,9 +1,8 @@
-from django.shortcuts import render,redirect,get_object_or_404
+from django.shortcuts import render,redirect
 from django.contrib import messages
 from django.contrib.auth.decorators import login_required
 from accounts.decorators import owner_required,require_permission
 from accounts.models import PermissionType
-from .models import Store,StoreConfig,Theme,Font,Colors
 from .forms import StoreForm,StoreConfigForm
 from django.views.decorators.http import require_POST
 
@@ -13,7 +12,7 @@ from django.views.decorators.http import require_POST
 @owner_required
 def store_settings(request):
 
-    store = Store.objects.first()
+    store = request.store
 
     if request.method == 'POST':
         form = StoreForm(request.POST,instance=store)
@@ -32,7 +31,7 @@ def store_settings(request):
 @require_POST
 def store_settings_toggle_active(request):
 
-    store = Store.objects.first()
+    store = request.store
 
     store.is_active = not store.is_active
 
@@ -49,7 +48,7 @@ def store_settings_toggle_active(request):
 @require_permission(PermissionType.MANAGE_STORE_UI)
 def store_customization(request):
 
-    store_config = get_object_or_404(StoreConfig,store=Store.objects.first())
+    store_config = request.store.config
 
     if request.method=='POST':
 
