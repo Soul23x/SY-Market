@@ -1,10 +1,12 @@
 from django.core.exceptions import PermissionDenied
-from .models import Store
+from django.http import Http404
 
 
 def store_active_required(view):
     def wrapper(request,*args,**kwargs):
-        if not Store.objects.first().is_active:
+        if request.store is None:
+            raise Http404('Page Does Not Exist')
+        if not request.store.is_active:
             raise PermissionDenied('Store Inactive')
         return view(request,*args,**kwargs)
     return wrapper
