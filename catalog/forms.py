@@ -8,6 +8,11 @@ class CategoryForm(forms.ModelForm):
 
 
 class ProductForm(forms.ModelForm):
+
+    def __init__(self,*args,store=None,**kwargs):
+        super().__init__(*args,**kwargs)
+        self.fields['category'].queryset = Category.objects.filter(store=store)
+
     class Meta:
         model = Product
         fields = ['name','category','thumbnail','description','price','stock']
