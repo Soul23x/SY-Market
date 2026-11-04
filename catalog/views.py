@@ -9,7 +9,6 @@ from django.contrib.auth.decorators import login_required
 from accounts.decorators import require_permission
 from accounts.models import PermissionType
 from store.decorators import store_active_required
-from store.models import Store,StoreConfig
 from orders.models import OrderItem
 from django.views.decorators.http import require_POST
 
@@ -17,11 +16,11 @@ from django.views.decorators.http import require_POST
 @store_active_required
 def home(request):
 
-    categories = Category.objects.filter(is_active=True).exclude(name='uncategorized').order_by('-created_at')[:8]
+    categories = Category.objects.filter(store=request.store,is_active=True).exclude(name='uncategorized').order_by('-created_at')[:8]
 
-    products = Product.objects.filter(is_active=True,category__is_active=True).order_by('-created_at')[:8]
+    products = Product.objects.filter(category__store=request.store,is_active=True,category__is_active=True).order_by('-created_at')[:8]
 
-    banner = Store.objects.first().config.banner
+    banner = request.store.config.banner
 
     context = {
         'products':products,
@@ -33,6 +32,8 @@ def home(request):
 
     return render(request,'catalog/home.html',context)
 
+
+
 @store_active_required
 def category_list(request):
 
@@ -43,9 +44,9 @@ def category_list(request):
     page = request.GET.get('page')
 
     if search_query:
-        categories = Category.objects.filter(is_active=True,name__icontains=search_query).order_by('-created_at')
+        categories = Category.objects.filter(store=request.store,is_active=True,name__icontains=search_query).order_by('-created_at')
     else :
-        categories = Category.objects.filter(is_active=True).order_by('-created_at')
+        categories = Category.objects.filter(store=request.store,is_active=True).order_by('-created_at')
 
     paginator = Paginator(categories,24)
 
@@ -61,11 +62,11 @@ def category_detail(request,category_id):
 
     context = {}
 
-    category = get_object_or_404(Category,is_active=True,id=category_id,store=Store.objects.first())
+    category = get_object_or_404(Category,is_active=True,id=category_id,store=request.store)
 
     context['category'] = category
 
-    context['latest_products'] = category.products.filter(is_active=True).order_by('-created_at')[:8]
+    context['latest_products'] = category.products.filter(category__store=request.store,is_active=True).order_by('-created_at')[:8]
 
     return render(request,'catalog/category-detail.html',context)
 
@@ -82,9 +83,9 @@ def product_list(request):
     category_id=request.GET.get('category')
 
     if search_query:
-        products = Product.objects.filter(Q(name__icontains=search_query) | Q(description__icontains=search_query),is_active=True,category__is_active=True).order_by('-created_at')
+        products = Product.objects.filter(Q(name__icontains=search_query) | Q(description__icontains=search_query),is_active=True,category__is_active=True,category__store=request.store).order_by('-created_at')
     else :
-        products = Product.objects.filter(is_active=True,category__is_active=True).order_by('-created_at')
+        products = Product.objects.filter(is_active=True,category__is_active=True,category__store=request.store).order_by('-created_at')
 
     if category_id:
         products=products.filter(category_id=category_id)
@@ -105,7 +106,7 @@ def product_detail(request,product_id):
 
     context = {}
 
-    product = get_object_or_404(Product,id=product_id,is_active=True,category__is_active=True)
+    product = get_object_or_404(Product,id=product_id,is_active=True,category__is_active=True,category__store=request.store)
     context['product'] = product
 
     if request.user.is_authenticated:
@@ -136,7 +137,7 @@ def category_add(request):
 
         if form.is_valid():
             category=form.save(commit=False)
-            category.store=Store.objects.first()
+            category.store=request.store
             category.save()
             return redirect('dashboard_category_list')
 
@@ -150,7 +151,7 @@ def category_add(request):
 @require_permission(PermissionType.MANAGE_PRODUCTS)
 def category_edit(request,category_id):
 
-    category = get_object_or_404(Category,id=category_id)
+    category = get_object_or_404(Category,id=category_id,store=request.store)
 
     if request.method=='POST':
 
@@ -171,7 +172,7 @@ def category_edit(request,category_id):
 @require_POST
 def category_toggle_active(request,category_id):
 
-    category = get_object_or_404(Category,id=category_id)
+    category = get_object_or_404(Category,id=category_id,store=request.store)
 
     if category.name == 'uncategorized':
         messages.error(request,'Uncategorized Category Can Not Be Activated')
@@ -197,9 +198,9 @@ def dashboard_category_list(request):
 
     if search_query:
 
-        categories = Category.objects.filter(Q(name__icontains=search_query) | Q(description__icontains=search_query))
+        categories = Category.objects.filter(Q(name__icontains=search_query) | Q(description__icontains=search_query),store=request.store)
     else :
-        categories = Category.objects.all()
+        categories = Category.objects.filter(store=request.store)
 
     paginator = Paginator(categories,24)
 
@@ -217,7 +218,7 @@ def dashboard_category_detail(request,category_id):
 
     context = {}
 
-    category = get_object_or_404(Category,id=category_id)
+    category = get_object_or_404(Category,id=category_id,store=request.store)
 
     context['category'] = category
 
@@ -234,7 +235,7 @@ def dashboard_category_detail(request,category_id):
 @require_POST
 def category_delete(request,category_id):
 
-    category = get_object_or_404(Category,id=category_id)
+    category = get_object_or_404(Category,id=category_id,store=request.store)
     name = category.name
     try:
         category.delete()
@@ -260,9 +261,9 @@ def dashboard_product_list(request):
     category_id = request.GET.get('category')
 
     if search_query:
-        products = Product.objects.filter(Q(name__icontains=search_query) | Q(description__icontains=search_query)).order_by('-created_at')
+        products = Product.objects.filter(Q(name__icontains=search_query) | Q(description__icontains=search_query),category__store=request.store).order_by('-created_at')
     else:
-        products = Product.objects.all().order_by('-created_at')
+        products = Product.objects.filter(category__store=request.store).order_by('-created_at')
 
     if category_id:
         products = products.filter(category_id=category_id)
@@ -285,7 +286,7 @@ def dashboard_product_detail(request,product_id):
 
     review_page = request.GET.get('review_page')
 
-    product = get_object_or_404(Product,id=product_id)
+    product = get_object_or_404(Product,id=product_id,category__store=request.store)
 
     context['product'] = product
 
@@ -307,7 +308,7 @@ def dashboard_product_detail(request,product_id):
 @require_POST
 def product_delete(request,product_id):
 
-    product = get_object_or_404(Product,id=product_id)
+    product = get_object_or_404(Product,id=product_id,category__store=request.store)
 
     if product.order_items.exists():
         product.is_active = not product.is_active
@@ -329,7 +330,7 @@ def product_delete(request,product_id):
 @require_POST
 def product_toggle_active(request,product_id):
 
-    product = get_object_or_404(Product,id=product_id)
+    product = get_object_or_404(Product,id=product_id,category__store=request.store)
 
     product.is_active = not product.is_active
 
@@ -345,13 +346,13 @@ def product_toggle_active(request,product_id):
 def product_add(request):
 
     if request.method=='POST':
-        form = ProductForm(request.POST,request.FILES)
+        form = ProductForm(request.POST,request.FILES,store=request.store)
         if form.is_valid():
             form.save()
             messages.success(request,'Product Added Successfully')
             return redirect('dashboard_product_list')
     else :
-        form = ProductForm()
+        form = ProductForm(store=request.store)
 
     return render(request,'catalog/product-add.html',{'form':form})
 
@@ -362,16 +363,16 @@ def product_add(request):
 @require_permission(PermissionType.MANAGE_PRODUCTS)
 def product_edit(request,product_id):
 
-    product = get_object_or_404(Product,id=product_id)
+    product = get_object_or_404(Product,id=product_id,category__store=request.store)
 
     if request.method=='POST':
-        form = ProductForm(request.POST,request.FILES,instance=product)
+        form = ProductForm(request.POST,request.FILES,instance=product,store=request.store)
         if form.is_valid():
             form.save()
             messages.success(request,'Product Edited Successfully')
             return redirect('dashboard_product_detail',product_id)
     else :
-        form = ProductForm(instance=product)
+        form = ProductForm(instance=product,store=request.store)
 
     return render(request,'catalog/product-edit.html',{'form':form})
 
@@ -380,7 +381,7 @@ def product_edit(request,product_id):
 @login_required
 def review_add(request,product_id):
 
-    product = get_object_or_404(Product,id=product_id)
+    product = get_object_or_404(Product,id=product_id,category__store=request.store)
 
     if not product.is_active:
         raise PermissionDenied("Access Denied: Product Deactivated")
@@ -408,7 +409,7 @@ def review_add(request,product_id):
 @login_required
 def review_edit(request,product_id,review_id):
 
-    review = get_object_or_404(Review,id=review_id)
+    review = get_object_or_404(Review,id=review_id,product__category__store=request.store)
 
     if review.customer!=request.user.customer:
         raise PermissionDenied("Access Denied: Review Doesn't Belong To User")
@@ -433,7 +434,7 @@ def review_edit(request,product_id,review_id):
 @require_POST
 def review_delete(request,product_id,review_id):
 
-    review = get_object_or_404(Review,id=review_id,product_id=product_id)
+    review = get_object_or_404(Review,id=review_id,product_id=product_id,product__category__store=request.store)
 
     if review.customer != request.user.customer:
         raise PermissionDenied("Access Denied: Review Doesn't Belong To Customer")
@@ -453,7 +454,7 @@ def product_image_add(request,product_id):
         form = ProductImageForm(request.POST,request.FILES)
         if form.is_valid():
             image = form.save(commit=False)
-            image.product = get_object_or_404(Product,id=product_id)
+            image.product = get_object_or_404(Product,id=product_id,category__store=request.store)
             image.save()
             messages.success(request,'Image Successfully Added')
             return redirect('dashboard_product_detail',product_id)
@@ -470,7 +471,7 @@ def product_image_add(request,product_id):
 @require_POST
 def product_image_delete(request,product_id,product_image_id):
     
-    image = get_object_or_404(ProductImage,id=product_image_id,product_id=product_id)
+    image = get_object_or_404(ProductImage,id=product_image_id,product_id=product_id,product__category__store=request.store)
 
     image.delete()
     messages.success(request,"Image Deleted")
