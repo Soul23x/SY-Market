@@ -18,9 +18,7 @@
     <li class='navbar_item'><a href="{% url 'home' %}">Home</a></li>
     <li class='navbar_item'><a href="{% url 'category_list' %}">Categories</a></li>
     <li class='navbar_item'><a href="{% url 'cart_detail' %}">Cart</a></li>
-    {% if user.customer.orders %}
     <li class='navbar_item'><a href="{% url 'customer_order_list' %}">Orders</a></li>
-    {% endif %}
 </ul>
 
 {% else %}
