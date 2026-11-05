@@ -1,7 +1,6 @@
 from django.shortcuts import render,redirect,get_object_or_404
 from .models import Order,OrderItem,OrderStatus
 from payments.models import Payment,PaymentMethod,PaymentStatus
-from store.models import Store
 from cart.models import Cart
 from django.db.models import Q
 from django.contrib.auth.decorators import login_required
@@ -29,7 +28,7 @@ def dashboard_order_list(request):
 
     fulfilled_orders_page = request.GET.get('fulfilled_orders_page')
 
-    store = Store.objects.first()
+    store = request.store
 
     if search_query:
         ongoing_orders = Order.objects.filter((Q(order_status=OrderStatus.PENDING) | Q(order_status=OrderStatus.PROCESSING) | Q(order_status=OrderStatus.SHIPPED)) & (Q(order_number__icontains=search_query) | Q(customer__user__first_name__icontains=search_query) | Q(customer__user__last_name__icontains=search_query) | Q(customer__user__email__icontains=search_query) | Q(customer__user__phone_number__icontains=search_query) | Q(shipping_address__governorate__icontains=search_query) | Q(shipping_address__city__icontains=search_query)),store=store)
@@ -90,7 +89,7 @@ class OrderStateMachine:
 @require_permission(PermissionType.MANAGE_ORDERS)
 def dashboard_order_detail(request,order_id):
 
-    order = get_object_or_404(Order,id=order_id,store=Store.objects.first())
+    order = get_object_or_404(Order,id=order_id,store=request.store)
 
     order_current_state = order.order_status
 
@@ -117,7 +116,7 @@ def restore_stock(order: Order):
 @transaction.atomic
 def order_status_update(request,order_id):
 
-    order = get_object_or_404(Order,id=order_id,store=Store.objects.first())
+    order = get_object_or_404(Order,id=order_id,store=request.store)
 
     try:
         new_status = OrderStatus(request.POST.get('status'))
@@ -158,9 +157,9 @@ def customer_order_list(request):
     page = request.GET.get('page')
 
     if search_query:
-        orders = Order.objects.filter(Q(order_number__icontains=search_query) | Q(order_status__icontains=search_query),store=Store.objects.first(),customer=request.user.customer)
+        orders = Order.objects.filter(Q(order_number__icontains=search_query) | Q(order_status__icontains=search_query),store=request.store,customer=request.user.customer)
     else:
-        orders = Order.objects.filter(store=Store.objects.first(),customer=request.user.customer)
+        orders = Order.objects.filter(store=request.store,customer=request.user.customer)
 
     paginator = Paginator(orders,24)
     page_obj = paginator.get_page(page)
@@ -172,7 +171,7 @@ def customer_order_list(request):
 @login_required
 def customer_order_detail(request,order_id):
 
-    order = get_object_or_404(Order,id=order_id,customer=request.user.customer)
+    order = get_object_or_404(Order,id=order_id,customer=request.user.customer,store=request.store)
 
     return render(request,'orders/customer-order-detail.html',{'order':order})
 
@@ -183,7 +182,7 @@ def customer_order_detail(request,order_id):
 @transaction.atomic
 def customer_order_cancel(request,order_id):
 
-    order = get_object_or_404(Order,id=order_id,customer=request.user.customer)
+    order = get_object_or_404(Order,id=order_id,customer=request.user.customer,store=request.store)
 
     if order.order_status != OrderStatus.PENDING or order.payment.payment_status != PaymentStatus.PENDING:
         messages.error(request,"Order Can't Be Cancelled In This Stage")
@@ -205,7 +204,7 @@ def checkout(request):
 
     context = {}
 
-    cart = Cart.objects.filter(customer=request.user.customer,store=Store.objects.first()).first()
+    cart = Cart.objects.filter(customer=request.user.customer,store=request.store).first()
     if not cart or not cart.cart_items.exists():
         messages.error(request,'Cart Empty')
         return redirect('cart_detail')
@@ -245,7 +244,7 @@ def place_order(request):
         messages.error(request,'No Address')
         return redirect('checkout')
 
-    cart = request.user.customer.carts.filter(store=Store.objects.first()).first()
+    cart = request.user.customer.carts.filter(store=request.store).first()
 
     if not cart or not cart.cart_items.exists():
         messages.error(request,'Cart Empty')
@@ -268,7 +267,7 @@ def place_order(request):
     new_address.is_primary=False
     new_address.save()
 
-    order = Order.objects.create(store=Store.objects.first(),customer=request.user.customer,order_number='temp',shipping_address=new_address,customer_phone_number=request.user.phone_number)
+    order = Order.objects.create(store=request.store,customer=request.user.customer,order_number='temp',shipping_address=new_address,customer_phone_number=request.user.phone_number)
     order_number = generate_order_number(order.id)
     order.order_number=order_number
     order.save()
