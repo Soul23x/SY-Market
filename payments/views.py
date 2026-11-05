@@ -6,12 +6,11 @@ from accounts.models import PermissionType
 from django.contrib.auth.decorators import login_required
 from django.core.paginator import Paginator
 from django.db.models import Q
-from store.models import Store
 from django.views.decorators.http import require_POST
 from django.db import transaction
 from orders.views import restore_stock
-from shipping.models import Shipment,ShipmentStatus
-from orders.models import Order,OrderStatus
+from shipping.models import ShipmentStatus
+from orders.models import OrderStatus
 
 
 @login_required
@@ -27,10 +26,10 @@ def payment_list(request):
             Q(transaction_id__icontains=search_query) |
             Q(payment_method__icontains=search_query) |
             Q(payment_status__icontains=search_query),
-            order__store = Store.objects.first()
+            order__store = request.store
             )
     else:
-        payments = Payment.objects.filter(order__store = Store.objects.first()).order_by('-created_at')
+        payments = Payment.objects.filter(order__store = request.store).order_by('-created_at')
 
     paginator = Paginator(payments,24)
     page_obj = paginator.get_page(page)
@@ -74,7 +73,7 @@ class PaymentStateMachine:
 @require_permission(PermissionType.MANAGE_PAYMENTS)
 def payment_detail(request,payment_id):
 
-    payment = get_object_or_404(Payment,id=payment_id,order__store=Store.objects.first())
+    payment = get_object_or_404(Payment,id=payment_id,order__store=request.store)
 
     payment_state_machine = PaymentStateMachine(payment.payment_status)
 
@@ -90,7 +89,7 @@ def payment_detail(request,payment_id):
 @transaction.atomic
 def payment_status_update(request,payment_id):
 
-    payment = get_object_or_404(Payment,id=payment_id,order__store=Store.objects.first())
+    payment = get_object_or_404(Payment,id=payment_id,order__store=request.store)
 
     try:
         status = PaymentStatus(request.POST.get('status'))

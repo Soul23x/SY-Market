@@ -3,15 +3,14 @@ from accounts.decorators import require_permission
 from django.contrib.auth.decorators import login_required
 from .models import Shipment,ShipmentStatus
 from accounts.models import PermissionType
-from store.models import Store
 from django.core.paginator import Paginator
 from django.db.models import Q
 from django.contrib import messages
 from django.views.decorators.http import require_POST
 from django.db import transaction
 from orders.views import restore_stock
-from payments.models import Payment,PaymentStatus
-from orders.models import Order,OrderStatus
+from payments.models import PaymentStatus
+from orders.models import OrderStatus
 
 
 @login_required
@@ -23,9 +22,9 @@ def shipment_list(request):
     page = request.GET.get('page')
 
     if search_query:
-        shipments = Shipment.objects.filter(Q(tracking_number__icontains=search_query) | Q(shipment_status__icontains=search_query), order__store=Store.objects.first()).order_by('-created_at')
+        shipments = Shipment.objects.filter(Q(tracking_number__icontains=search_query) | Q(shipment_status__icontains=search_query), order__store=request.store).order_by('-created_at')
     else:
-        shipments = Shipment.objects.filter(order__store=Store.objects.first()).order_by('-created_at')
+        shipments = Shipment.objects.filter(order__store=request.store).order_by('-created_at')
 
     paginator = Paginator(shipments,24)
 
@@ -40,7 +39,7 @@ def shipment_list(request):
 @require_POST
 def shipment_assign_tracking_number(request,shipment_id):
 
-    shipment = get_object_or_404(Shipment,id=shipment_id,order__store=Store.objects.first())
+    shipment = get_object_or_404(Shipment,id=shipment_id,order__store=request.store)
 
     tracking_number = request.POST.get('tracking_number').strip()
 
@@ -93,7 +92,7 @@ class ShipmentStateMachine:
 @require_permission(PermissionType.MANAGE_SHIPMENTS)
 def shipment_detail(request,shipment_id):
 
-    shipment = get_object_or_404(Shipment,id=shipment_id,order__store=Store.objects.first())
+    shipment = get_object_or_404(Shipment,id=shipment_id,order__store=request.store)
 
     shipment_state_machine = ShipmentStateMachine(shipment.shipment_status)
 
@@ -109,7 +108,7 @@ def shipment_detail(request,shipment_id):
 @transaction.atomic
 def shipment_status_update(request,shipment_id):
 
-    shipment = get_object_or_404(Shipment,id=shipment_id,order__store=Store.objects.first())
+    shipment = get_object_or_404(Shipment,id=shipment_id,order__store=request.store)
 
     try:
         new_status = ShipmentStatus(request.POST.get('status'))
