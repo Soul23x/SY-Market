@@ -2,7 +2,6 @@ from django.shortcuts import render,redirect,get_object_or_404
 from django.contrib.auth.decorators import login_required
 from .models import Cart,CartItem
 from catalog.models import Product
-from store.models import Store
 from django.contrib import messages
 from store.decorators import store_active_required
 from django.views.decorators.http import require_POST
@@ -18,11 +17,11 @@ def cart_sync(cart : Cart):
     return cart.cart_items.all()
 
 
-@store_active_required
 @login_required
+@store_active_required
 def cart_detail(request):
 
-    store = Store.objects.first()
+    store = request.store
 
     cart, created = Cart.objects.get_or_create(customer=request.user.customer,store=store)
 
@@ -43,8 +42,8 @@ def cart_detail(request):
     return render(request,'cart/cart-detail.html',context)
 
 
-@store_active_required
 @login_required
+@store_active_required
 @require_POST
 def cart_item_add(request, product_id):
     try:
@@ -56,7 +55,7 @@ def cart_item_add(request, product_id):
         messages.error(request,'Invalid Quantity')
         return redirect('product_detail',product_id)
     
-    product = get_object_or_404(Product, id=product_id, is_active=True,category__is_active=True)
+    product = get_object_or_404(Product, id=product_id, is_active=True,category__is_active=True,category__store=request.store)
 
     cart, cart_created = Cart.objects.get_or_create(customer=request.user.customer, store=product.category.store)
     cart_item, item_created = CartItem.objects.get_or_create(cart=cart, product=product, defaults={'quantity': quantity})
@@ -79,8 +78,8 @@ def cart_item_add(request, product_id):
     return redirect('cart_detail')
 
 
-@store_active_required
 @login_required
+@store_active_required
 @require_POST
 def cart_item_increase(request,cart_item_id):
 
@@ -95,7 +94,7 @@ def cart_item_increase(request,cart_item_id):
 
     #increment = int(request.POST.get('increment',1))
 
-    cart_item = get_object_or_404(CartItem,id=cart_item_id,cart__customer_id=request.user.customer.id)
+    cart_item = get_object_or_404(CartItem,id=cart_item_id,cart__customer_id=request.user.customer.id,cart__store=request.store)
 
     if cart_item.quantity+increment > cart_item.product.stock:
         messages.error(request,'Quantity Added More Than Available Stock')
@@ -110,8 +109,9 @@ def cart_item_increase(request,cart_item_id):
     return redirect('cart_detail')
 
 
-@store_active_required
+
 @login_required
+@store_active_required
 @require_POST
 def cart_item_decrease(request,cart_item_id):
 
@@ -126,7 +126,7 @@ def cart_item_decrease(request,cart_item_id):
 
     #decrement = int(request.POST.get('decrement',1))
 
-    cart_item = get_object_or_404(CartItem,id=cart_item_id,cart__customer_id=request.user.customer.id)
+    cart_item = get_object_or_404(CartItem,id=cart_item_id,cart__customer_id=request.user.customer.id,cart__store=request.store)
 
     if cart_item.quantity-decrement <= 0:
         messages.error(request,"Quantity Can't Be Negative Or Zero")
@@ -141,11 +141,12 @@ def cart_item_decrease(request,cart_item_id):
     return redirect('cart_detail')
 
 
-@store_active_required
+
 @login_required
+@store_active_required
 @require_POST
 def cart_item_delete(request,cart_item_id):
-    cart_item = get_object_or_404(CartItem,id=cart_item_id,cart__customer_id=request.user.customer.id)
+    cart_item = get_object_or_404(CartItem,id=cart_item_id,cart__customer_id=request.user.customer.id,cart__store=request.store)
     cart_item.delete()
     messages.success(request,'Cart Item Deleted')
 
@@ -156,11 +157,11 @@ def cart_item_delete(request,cart_item_id):
     return redirect('cart_detail')
 
 
-@store_active_required
 @login_required
+@store_active_required
 @require_POST
 def cart_clear(request):
-    cart = Cart.objects.filter(customer=request.user.customer,store=Store.objects.first()).first()
+    cart = Cart.objects.filter(customer=request.user.customer,store=request.store).first()
     if cart:
         CartItem.objects.filter(cart=cart).delete()
     messages.success(request,'Cart Cleared')
