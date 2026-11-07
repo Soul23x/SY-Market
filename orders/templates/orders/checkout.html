@@ -71,10 +71,10 @@ what even is that ?
     <span class='address_list_item_notes'>{{address.notes}}</span>
     {% endif %}
     <div class='address_list_item_buttons'>
-        <a class='address_list_item_edit_button' href="{% url 'address_edit' address.id %}?next={% url 'checkout' %}">Edit</a>
-        <form method='post' action="{% url 'address_delete' address.id %}" style="display:inline;" class="inline-form">
+        <a class='address_list_item_edit_button' href="{{platform_url}}{% url 'address_edit' address.id %}?next={{ request.scheme }}://{{ request.get_host }}{% url 'checkout' %}">Edit</a>
+        <form method='post' action="{{platform_url}}{% url 'address_delete' address.id %}" style="display:inline;" class="inline-form">
             {% csrf_token %}
-            <input type="hidden" name="next" value="{% url 'checkout' %}">
+            <input type="hidden" name="next" value="{{ request.scheme }}://{{ request.get_host }}{% url 'checkout' %}">
             <button type='submit' class='address_list_item_delete_button'>Delete</button>
         </form>
     </div>
@@ -84,7 +84,7 @@ what even is that ?
 {% else %}
 <p class='checkout_no_addresses'>No Address</p>
 {% endif %}
-<a href="{% url 'address_add' %}?next={% url 'checkout' %}" class='checkout_add_address_button'>Add Address</a>
+<a href="{{platform_url}}{% url 'address_add' %}?next={{ request.scheme }}://{{ request.get_host }}{% url 'checkout' %}" class='checkout_add_address_button'>Add Address</a>
 </div>
 
 
