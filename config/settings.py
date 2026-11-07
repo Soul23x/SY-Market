@@ -44,7 +44,12 @@ MEDIA_URL = '/media/'
 MEDIA_ROOT = BASE_DIR / 'media'
 
 ####### and this
+
 SESSION_COOKIE_DOMAIN = os.getenv('SESSION_COOKIE_DOMAIN') or None
+
+####### and this
+
+LOGIN_URL = os.getenv('LOGIN_URL', '/login/')
 
 
 # Application definition
