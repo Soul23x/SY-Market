@@ -93,6 +93,7 @@ TEMPLATES = [
                 'dashboard.context_processors.dashboard_permissions',
                 'store.context_processors.store_config',
                 'store.context_processors.store_footer',
+                'store.context_processors.platform_url',
             ],
         },
     },

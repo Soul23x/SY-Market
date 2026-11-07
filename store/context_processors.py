@@ -1,4 +1,5 @@
-from .models import StoreConfig,Store
+from .models import StoreConfig
+from django.conf import settings
 
 def store_config(request):
 
@@ -28,3 +29,17 @@ def store_footer(request):
         'store_contact_email':store.contact_email,
         'store_description':store.description
     }
+
+
+def platform_url(request):
+
+    scheme = request.scheme
+    platform_domain = settings.PLATFORM_DOMAIN
+    port = request.get_port()
+
+    if port in ('80','443'):
+        base_url = f'{scheme}://{platform_domain}'
+    else:
+        base_url = f'{scheme}://{platform_domain}:{port}'
+
+    return {'platform_url':base_url}
