@@ -5,6 +5,7 @@ from catalog.models import Product
 from django.contrib import messages
 from store.decorators import store_active_required
 from django.views.decorators.http import require_POST
+from accounts.utils import is_safe_url
 
 
 def cart_sync(cart : Cart):
@@ -104,7 +105,7 @@ def cart_item_increase(request,cart_item_id):
     messages.success(request,'Cart Item Quantity Updated')
 
     next_url = request.GET.get('next') or request.POST.get('next')
-    if next_url:
+    if is_safe_url(next_url):
         return redirect(next_url)
     return redirect('cart_detail')
 
@@ -136,7 +137,7 @@ def cart_item_decrease(request,cart_item_id):
     messages.success(request,'Cart Item Quantity Updated')
 
     next_url = request.GET.get('next') or request.POST.get('next')
-    if next_url:
+    if is_safe_url(next_url):
         return redirect(next_url)
     return redirect('cart_detail')
 
@@ -151,9 +152,8 @@ def cart_item_delete(request,cart_item_id):
     messages.success(request,'Cart Item Deleted')
 
     next_url = request.GET.get('next') or request.POST.get('next')
-    if next_url:
+    if is_safe_url(next_url):
         return redirect(next_url)
-
     return redirect('cart_detail')
 
 
