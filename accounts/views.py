@@ -11,6 +11,7 @@ from orders.models import OrderStatus, Order
 from django.core.paginator import Paginator
 from accounts.decorators import owner_required
 from django.views.decorators.http import require_POST
+from accounts.utils import is_safe_url
 
 
 
@@ -128,7 +129,7 @@ def address_add(request):
             address.customer = request.user.customer
             address.save()
             messages.success(request,'Address Added Successfully')
-            if next_url:
+            if is_safe_url(next_url):
                 return redirect(next_url)
             return redirect('address_list')
     else :
@@ -149,7 +150,7 @@ def address_edit(request,address_id):
         if form.is_valid():
             form.save()
             messages.success(request,'Address Edited Successfully')
-            if next_url:
+            if is_safe_url(next_url):
                 return redirect(next_url)
             return redirect('address_list')
     else :
@@ -184,8 +185,8 @@ def address_delete(request,address_id):
     address = get_object_or_404(request.user.customer.addresses,id=address_id,is_order_snapshot=False)
     address.delete()
     messages.success(request,'Address Successfully Deleted')
-    next_url = request.GET.get('next','')
-    if next_url:
+    next_url = request.GET.get('next','') or request.POST.get('next','')
+    if is_safe_url(next_url):
         return redirect(next_url)
     return redirect('address_list')
 
