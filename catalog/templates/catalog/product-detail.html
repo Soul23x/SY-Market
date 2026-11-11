@@ -17,7 +17,7 @@
     {% if product.stock > 0 %}
     <p class='product_stock'>In Stock: {{product.stock}}</p>
     {% if not user.is_authenticated %}
-    <a class='product_anonymous_add_to_cart_button' href="{{platform_url}}{% url 'login' %}">Add To Cart</a>
+    <a class='product_anonymous_add_to_cart_button' href="{% url 'login' %}">Add To Cart</a>
     {% else %}
     <form method='post' action="{% url 'cart_item_add' product.id %}">
         {% csrf_token %}

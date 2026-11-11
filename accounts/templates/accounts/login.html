@@ -6,6 +6,7 @@
 <form method='POST' class='login_form'>
     {% csrf_token %}
     {{form.as_p}}
+    <input type="hidden" name="next" value="{{ next_url }}">
     <button type='submit' class='login_button'>login</button>
 </form>
 

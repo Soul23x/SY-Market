@@ -32,17 +32,23 @@ def register_view(request):
 
 def login_view(request):
 
+    next_url = request.GET.get('next','') or request.POST.get('next','')
+
     if request.method=='POST':
         form = AuthenticationForm(request,data=request.POST)
         if form.is_valid():
             login(request,form.get_user())
             messages.success(request,'Login Successful')
+            if is_safe_url(next_url):
+                return redirect(next_url)
+            if request.store is None:
+                return redirect('profile')
             if (hasattr(request.user,'store_owner') and request.user.store_owner.store == request.store) or Employee.objects.filter(user=request.user,store=request.store,is_active=True).exists():
                 return redirect('dashboard_home')
             return redirect('home')
     else :
         form = AuthenticationForm(request)
-    return render(request,'accounts/login.html',{'form':form})
+    return render(request,'accounts/login.html',{'form':form,'next_url':next_url})
 
 
 

@@ -23,7 +23,7 @@
 
 {% else %}
 <ul class='upper_navbar'>
-    <li class='upper_navbar_item'><a href="{{platform_url}}{% url 'login' %}">Login</a></li>
+    <li class='upper_navbar_item'><a href="{% url 'login' %}">Login</a></li>
     {% if logo %}
     <li class='store_logo'><img src="{{logo.url}}" alt="{{alt_logo}}" class='upper_navbar_logo'></li>
     {% endif %}

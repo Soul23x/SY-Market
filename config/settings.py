@@ -49,7 +49,7 @@ SESSION_COOKIE_DOMAIN = os.getenv('SESSION_COOKIE_DOMAIN') or None
 
 ####### and this
 
-LOGIN_URL = os.getenv('LOGIN_URL', '/login/')
+LOGIN_URL = '/login/'
 
 
 # Application definition
