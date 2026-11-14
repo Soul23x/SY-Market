@@ -1,0 +1,24 @@
+{% extends "base.html" %}
+
+{% block title %}SY-Market{% endblock title %}
+
+{% block content %}
+
+<h1 class='landing_header'>Where merchants and customers meet</h1>
+
+<h3 class='landing_featured_header'>Featured Stores</h3>
+
+<div class='featured_stores_block'>
+    {% for store in featured_stores %}
+    <div class='store_card'>
+        {% if store.config.logo %}
+        <img src="{{ store.config.logo.url }}" alt="{{ store.name }}">
+        {% endif %}
+        <p class='store_card_name'>{{ store.name }}</p>
+    </div>
+    {% empty %}
+    <p class='no_featured_stores'>No stores yet</p>
+    {% endfor %}
+</div>
+
+{% endblock content %}

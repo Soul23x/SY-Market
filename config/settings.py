@@ -70,6 +70,7 @@ INSTALLED_APPS = [
     'payments',
     'shipping',
     'dashboard',
+    'portal',
 ]
 
 MIDDLEWARE = [
