@@ -42,7 +42,7 @@ def login_view(request):
             if is_safe_url(next_url):
                 return redirect(next_url)
             if request.store is None:
-                return redirect('profile')
+                return redirect('landing')
             if (hasattr(request.user,'store_owner') and request.user.store_owner.store == request.store) or Employee.objects.filter(user=request.user,store=request.store,is_active=True).exists():
                 return redirect('dashboard_home')
             return redirect('home')
