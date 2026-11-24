@@ -43,3 +43,10 @@ def platform_url(request):
         base_url = f'{scheme}://{platform_domain}:{port}'
 
     return {'platform_url':base_url}
+
+
+def base_template(request):
+
+    if request.store is not None:
+        return {'base_template':'base.html'}
+    return {'base_template':'base-platform.html'}

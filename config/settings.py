@@ -100,6 +100,7 @@ TEMPLATES = [
                 'store.context_processors.store_config',
                 'store.context_processors.store_footer',
                 'store.context_processors.platform_url',
+                'store.context_processors.base_template',
             ],
         },
     },
