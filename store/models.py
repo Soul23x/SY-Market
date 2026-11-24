@@ -1,6 +1,7 @@
 from django.db import models
 from django.core.validators import RegexValidator
 from django.core.exceptions import ValidationError
+from django.conf import settings
 
 
 RESERVED_SUBDOMAINS = ['www', 'admin', 'api', 'app', 'static', 'media']
@@ -32,6 +33,12 @@ class Store(models.Model):
     contact_phone = models.CharField(max_length=15,blank=True,null=True)
     
     contact_email = models.EmailField(blank=True,null=True)
+
+    def get_url(self):
+        url = f'{settings.PLATFORM_SCHEME}://{self.subdomain}.{settings.PLATFORM_DOMAIN}'
+        if settings.PLATFORM_PORT:
+            url += f':{settings.PLATFORM_PORT}'
+        return url
 
     def __str__(self):
         return self.name

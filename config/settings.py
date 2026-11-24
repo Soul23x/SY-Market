@@ -34,6 +34,10 @@ ALLOWED_HOSTS = os.getenv('ALLOWED_HOSTS', '').split(',')
 
 PLATFORM_DOMAIN = os.getenv('PLATFORM_DOMAIN', 'localhost')
 
+PLATFORM_SCHEME = os.getenv('PLATFORM_SCHEME', 'http')
+
+PLATFORM_PORT = os.getenv('PLATFORM_PORT', '')
+
 ######### I added this
 
 AUTH_USER_MODEL = "accounts.User"

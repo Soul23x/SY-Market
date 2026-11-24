@@ -10,12 +10,14 @@
 
 <div class='featured_stores_block'>
     {% for store in featured_stores %}
+    <a href="{{store.get_url}}">
     <div class='store_card'>
         {% if store.config.logo %}
         <img src="{{ store.config.logo.url }}" alt="{{ store.name }}">
         {% endif %}
         <p class='store_card_name'>{{ store.name }}</p>
     </div>
+    </a>
     {% empty %}
     <p class='no_featured_stores'>No stores yet</p>
     {% endfor %}
