@@ -1,6 +1,7 @@
 from django.db import models
 from django.core.validators import MinValueValidator
 from django.utils import timezone
+from django.db.models import UniqueConstraint, Q
 
 
 
@@ -49,3 +50,42 @@ class Subscription(models.Model):
 
     def __str__(self):
         return f'{self.store.name} - {self.plan.name}'
+
+
+
+class SubscriptionPaymentMethod(models.TextChoices):
+    SHAMCASH = "SHAMCASH", "Sham Cash"
+    SYRIATELCASH = "SYRIATELCASH", "Syriatel Cash"
+
+
+class SubscriptionPaymentStatus(models.TextChoices):
+    PENDING = "PENDING", "Pending"
+    APPROVED = "APPROVED", "Approved"
+    REJECTED = "REJECTED", "Rejected"
+
+
+class SubscriptionPayment(models.Model):
+
+    subscription = models.ForeignKey('portal.Subscription',on_delete=models.CASCADE,related_name='payments')
+
+    amount = models.DecimalField(max_digits=11,decimal_places=2,validators=[MinValueValidator(0)])
+
+    method = models.CharField(max_length=30,choices=SubscriptionPaymentMethod.choices)
+
+    transaction_id = models.CharField(max_length=50,unique=True)
+
+    sender_phone = models.CharField(max_length=15)
+
+    status = models.CharField(max_length=30,choices=SubscriptionPaymentStatus.choices,default=SubscriptionPaymentStatus.PENDING)
+
+    created_at = models.DateTimeField(auto_now_add=True)
+
+    reviewed_at = models.DateTimeField(null=True,blank=True)
+
+    reviewed_by = models.ForeignKey('accounts.User',on_delete=models.SET_NULL,null=True,blank=True,related_name='reviewed_subscription_payments')
+
+    class Meta:
+        constraints = [UniqueConstraint(fields=['subscription'],condition=Q(status=SubscriptionPaymentStatus.PENDING),name='one_pending_payment_per_subscription')]
+
+    def __str__(self):
+        return f'{self.transaction_id} ({self.status})'
