@@ -15,6 +15,12 @@ subdomain_format_validator = RegexValidator(
     message='Use lowercase letters, digits and hyphens only.',
 )
 
+class StoreApprovalStatus(models.TextChoices):
+    PENDING = "PENDING", "Pending"
+    APPROVED = "APPROVED", "Approved"
+    REJECTED = "REJECTED", "Rejected"
+
+
 #use a model form
 class Store(models.Model):
 
@@ -33,6 +39,12 @@ class Store(models.Model):
     contact_phone = models.CharField(max_length=15,blank=True,null=True)
     
     contact_email = models.EmailField(blank=True,null=True)
+
+    approval_status = models.CharField(max_length=30,choices=StoreApprovalStatus.choices,default=StoreApprovalStatus.PENDING)
+
+    is_featured = models.BooleanField(default=False)
+
+    rejection_reason = models.TextField(blank=True,default='')
 
     def get_url(self):
         url = f'{settings.PLATFORM_SCHEME}://{self.subdomain}.{settings.PLATFORM_DOMAIN}'
